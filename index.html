@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Straightness Lab · ISO 1101 Intersection &amp; Orientation Plane Indicators</title>
+  <meta name="description" content="Interactive 1967 book-plate 3D &amp; 2D inspection lab for DIN EN ISO 1101 straightness tolerances with intersection and orientation plane indicators.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2218%22 fill=%22%23efe6d3%22 stroke=%22%23181715%22 stroke-width=%226%22/><rect x=%2214%22 y=%2232%22 width=%2244%22 height=%2236%22 fill=%22%23faf5e8%22 stroke=%22%23181715%22 stroke-width=%225%22/><path d=%22M24 50h24%22 stroke=%22%23181715%22 stroke-width=%226%22/><polygon points=%2258,50 70,32 88,32 88,68 70,68%22 fill=%22%23f6efe0%22 stroke=%22%23d94426%22 stroke-width=%225%22/></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Header (Pure 1967 Book Plate Aesthetic) -->
+    <header id="app-header">
+      <div class="header-left">
+        <div class="brand-badge-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="11" height="12" rx="1"/>
+            <path d="M4.5 12h6"/>
+            <polygon points="13,12 16.5,6 22,6 22,18 16.5,18" stroke="#d94426" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1><span id="ui-brand-title">STRAIGHTNESS LAB</span> <span class="sub-tag" id="ui-brand-sub">ISO 1101 Plane Indicators</span></h1>
+          <p class="source-ref" id="ui-source-ref">DIN EN ISO 1101:2017 · Intersection &amp; Orientation Plane Indicators</p>
+        </div>
+      </div>
+
+      <nav class="main-tabs" role="tablist" aria-label="Application Sections">
+        <button class="tab-btn active" data-tab="atlas" role="tab" aria-selected="true" id="tab-btn-atlas">3D Plate Atlas &amp; Tour</button>
+        <button class="tab-btn" data-tab="lab" role="tab" aria-selected="false" id="tab-btn-lab">Parametric Tolerance Lab</button>
+        <button class="tab-btn" data-tab="concepts" role="tab" aria-selected="false" id="tab-btn-concepts">Laws &amp; Engineering Notes</button>
+        <button class="tab-btn" data-tab="reading" role="tab" aria-selected="false" id="tab-btn-reading">Standards &amp; Reading</button>
+      </nav>
+
+      <div class="header-right">
+        <div class="seg-mini" id="lang-toggle-group" title="Switch language / Sprache umschalten">
+          <button class="mini-btn active" data-lang="en">EN</button>
+          <button class="mini-btn" data-lang="de">DE</button>
+        </div>
+        <button id="btn-start-tour" class="pill-btn accent">
+          <span>▶</span> <span id="ui-btn-tour">Guided Tour</span>
+        </button>
+        <button id="btn-play-pause" class="pill-btn" title="Pause or resume probe sweep animation (Space)">
+          <span id="play-icon">⏸</span> <span id="play-label">Probe</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main id="workspace">
+      <div id="interactive-shell">
+        <section id="stage-column">
+          <!-- 3D Viewport -->
+          <div id="viewport-wrap">
+            <div id="three-container"></div>
+
+            <!-- SVG + HTML Call-Outs Projection Overlay -->
+            <svg id="callout-svg" aria-hidden="true"></svg>
+            <div id="callout-layer"></div>
+
+            <!-- Top HUD Row -->
+            <div class="hud-top-row">
+              <!-- Atlas Selector Bar -->
+              <div id="atlas-figure-bar" class="hud-bar">
+                <button class="fig-chip active" id="btn-overview" data-fig="overview">Overview (4 Plates)</button>
+                <button class="mini-btn" id="btn-prev-fig" title="Previous Figure">◀</button>
+                <select id="select-figure" class="hud-select" title="Select Plate Case (I–IV)"></select>
+                <button class="mini-btn" id="btn-next-fig" title="Next Figure">▶</button>
+                <div class="seg-mini" id="variant-state-group" title="Compare ideal textbook nominal vs exaggerated form deviation">
+                  <button class="mini-btn" data-vstate="nominal" id="btn-vstate-nom">a · Nominal Ideal</button>
+                  <button class="mini-btn active" data-vstate="error" id="btn-vstate-err">b · Exaggerated Error</button>
+                </div>
+              </div>
+
+              <!-- Lab Status Badges -->
+              <div id="lab-status-bar" class="hud-bar hidden">
+                <span class="status-pill good" id="badge-status">PASS · 0.012 / 0.050 mm</span>
+                <span class="status-pill" id="badge-flatness">Flatness 0.072 mm</span>
+                <span class="status-pill" id="badge-dof">Transverse unconstrained</span>
+              </div>
+
+              <!-- Top-Right Plate Render Controls -->
+              <div class="hud-bar hud-controls-right">
+                <select id="select-display-mode" class="hud-select" title="3D Display Layering">
+                  <option value="solid3d" id="opt-solid">3D Book Plate</option>
+                  <option value="exploded" id="opt-exploded">Section &amp; Zone</option>
+                  <option value="plate2d" id="opt-plate2d">Ortho Top/End</option>
+                  <option value="wireframe" id="opt-wire">Ink Wireframe</option>
+                </select>
+                <button id="btn-toggle-callouts" class="mini-toggle active">Call-Outs</button>
+                <button id="btn-toggle-zone" class="mini-toggle active">Tolerance Zone</button>
+                <button id="btn-toggle-planes" class="mini-toggle active">Cut Planes</button>
+                <button id="btn-reset-cam" class="mini-toggle">Reset Cam</button>
+              </div>
+            </div>
+
+            <!-- Bottom-Left Camera Presets -->
+            <div class="hud-bar hud-bottom-left" id="cam-presets-bar">
+              <button class="cam-chip" data-cam="iso" id="cam-iso">3D Perspective</button>
+              <button class="cam-chip" data-cam="top" id="cam-top">Plan View</button>
+              <button class="cam-chip" data-cam="front" id="cam-front">Front / Datum A</button>
+              <button class="cam-chip" data-cam="end" id="cam-end">End Section (t_G)</button>
+            </div>
+
+            <!-- Bottom-Right Authentic Book Plate Symbol Key -->
+            <div class="plate-legend-card" aria-label="ISO 1101 Plate Legend">
+              <span><strong>—</strong> <span id="leg-surf">Tolerated Line</span></span>
+              <span class="vermilion"><strong>⟨[ ]</strong> <span id="leg-cut">Plane Indicator</span></span>
+              <span class="emerald"><strong>═</strong> <span id="leg-zone">t_G Zone</span></span>
+              <span class="vermilion"><strong>•</strong> <span id="leg-fail">Out of Tol</span></span>
+              <span><strong>▲</strong> <span id="leg-dat">Datum A/B</span></span>
+            </div>
+
+            <!-- Guided Tour Floating Card (Atlas Mode) -->
+            <div id="tour-card" class="tour-card hidden">
+              <div class="tour-header">
+                <span class="tour-badge" id="tour-badge">Stop 1 of 5</span>
+                <div class="tour-dots" id="tour-dots"></div>
+                <button id="btn-tour-close" class="icon-close" title="Exit guided tour">✕</button>
+              </div>
+              <h3 id="tour-title">Tour Title</h3>
+              <p id="tour-summary"></p>
+              <div class="tour-takeaway" id="tour-takeaway"></div>
+              <div class="tour-actions">
+                <button id="btn-tour-prev" class="tour-nav-btn">← Prev</button>
+                <button id="btn-tour-auto" class="tour-nav-btn secondary">▶ Auto</button>
+                <button id="btn-tour-next" class="tour-nav-btn primary">Next →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Synchronized 2D Section & Multi-Station Deviation Strip (Lab Mode) -->
+          <div id="flow2d-strip" class="hidden">
+            <div class="canvas-card">
+              <canvas id="canvas-slice"></canvas>
+            </div>
+            <div class="canvas-card">
+              <canvas id="canvas-plots"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right Sidebar -->
+        <aside id="right-sidebar">
+          <!-- Atlas Inspector Panel -->
+          <div id="atlas-panel" class="sidebar-pane">
+            <div class="panel-header">
+              <div>
+                <span class="kicker" id="atlas-code">PLATES I–IV · OVERVIEW</span>
+                <h2 id="atlas-title">Straightness Plane Indicators</h2>
+              </div>
+              <span class="regime-tag" id="atlas-cat-tag">ISO 1101:2017</span>
+            </div>
+
+            <div id="atlas-fcf-wrap"></div>
+
+            <p class="panel-desc" id="atlas-summary"></p>
+
+            <div class="book-quote" id="atlas-quote"></div>
+
+            <div class="section-label" id="atlas-list-heading">All 4 Plane Indicator Cases (Plates I–IV)</div>
+            <div id="callout-detail-list" class="callout-list"></div>
+
+            <div class="section-label" id="atlas-snapshot-heading">Computed ISO 1101 Snapshot</div>
+            <div id="atlas-metrics" class="mini-kpi-grid"></div>
+
+            <div class="panel-cta-row">
+              <button id="btn-open-in-lab" class="cta-btn">Open &amp; Simulate in Tolerance Lab →</button>
+            </div>
+          </div>
+
+          <!-- Parametric Tolerance Lab Panel -->
+          <div id="lab-panel" class="sidebar-pane hidden">
+            <div class="panel-header compact">
+              <div>
+                <span class="kicker" id="ui-lab-kicker">INTERACTIVE ISO 1101 SANDBOX</span>
+                <h2 id="ui-lab-title">Parametric Tolerance Lab</h2>
+              </div>
+              <button id="btn-reset-lab" class="mini-btn">Reset</button>
+            </div>
+
+            <!-- Live FCF Preview Card -->
+            <div id="lab-fcf-wrap"></div>
+
+            <!-- Presets -->
+            <div class="preset-strip" id="lab-presets"></div>
+
+            <!-- Live KPIs -->
+            <div class="kpi-grid" id="lab-kpis"></div>
+
+            <!-- ISO 1101 Indicator Controls -->
+            <div class="control-group">
+              <div class="group-title" id="ui-grp-ind">ISO 1101 Indicator &amp; Tolerance</div>
+              <div class="mode-switch-row">
+                <span class="slider-label" id="ui-lbl-ind">Indicator</span>
+                <div class="seg-mini" id="ind-type-group">
+                  <button class="mini-btn active" data-ind="intersection" id="btn-ind-inter">Intersection ⟨[...]</button>
+                  <button class="mini-btn" data-ind="orientation" id="btn-ind-orient">Orientation ⟨[...]⟩</button>
+                </div>
+              </div>
+              <div class="mode-switch-row">
+                <span class="slider-label" id="ui-lbl-rel">Plane</span>
+                <div class="seg-mini" id="plane-rel-group">
+                  <button class="mini-btn active" data-rel="parallel" id="btn-rel-par">// Parallel</button>
+                  <button class="mini-btn" data-rel="perp" id="btn-rel-perp">⊥ Perp</button>
+                </div>
+              </div>
+              <div class="mode-switch-row" id="datum-row">
+                <span class="slider-label" id="ui-lbl-dat">Datum</span>
+                <div class="seg-mini" id="datum-group">
+                  <button class="mini-btn active" data-dat="A">A (Front)</button>
+                  <button class="mini-btn" data-dat="B">B (Base)</button>
+                </div>
+              </div>
+              <div id="tolerance-sliders"></div>
+            </div>
+
+            <!-- Form Error Sliders -->
+            <div class="control-group">
+              <div class="group-title" id="ui-grp-def">Manufacturing Form Deviation</div>
+              <div id="deform-sliders"></div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Laws & Engineering Notes View -->
+      <section id="concepts-view" class="editorial-view hidden">
+        <div class="editorial-container">
+          <div class="editorial-intro">
+            <span class="kicker" id="ui-concepts-kicker"></span>
+            <h2 id="ui-concepts-title"></h2>
+            <p id="ui-concepts-intro"></p>
+          </div>
+          <div class="concepts-split">
+            <div class="concepts-col">
+              <h3 id="ui-laws-heading"></h3>
+              <div id="concepts-grid" class="concepts-grid"></div>
+            </div>
+            <div class="book-col">
+              <div class="book-page-card">
+                <div class="book-page-head">
+                  <span id="ui-book-head-l"></span>
+                  <span id="ui-book-head-r"></span>
+                </div>
+                <h3 id="ui-book-title"></h3>
+                <p class="book-page-note" id="ui-book-note"></p>
+                <div id="book-paragraphs"></div>
+                <div class="book-page-foot">DIN EN ISO 1101:2017 · ISO 5459 · ISO 12780</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Further Reading View -->
+      <section id="reading-view" class="editorial-view hidden">
+        <div class="editorial-container">
+          <div class="editorial-intro">
+            <span class="kicker" id="ui-reading-kicker"></span>
+            <h2 id="ui-reading-title"></h2>
+            <p id="ui-reading-intro"></p>
+          </div>
+          <div class="reading-grid">
+            <div class="reading-col">
+              <h3 id="ui-read-col1"></h3>
+              <div id="reading-standards-list" class="reading-list"></div>
+            </div>
+            <div class="reading-col">
+              <h3 id="ui-read-col2"></h3>
+              <div id="reading-books-list" class="reading-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Local Vendor Libraries (100% standalone & offline-ready) -->
+  <script src="vendor/three/three.min.js"></script>
+  <script src="vendor/three/OrbitControls.js"></script>
+  <script src="vendor/katex/katex.min.js"></script>
+
+  <!-- Application Modules -->
+  <script src="physics.js"></script>
+  <script src="data.js"></script>
+  <script src="scene3d.js"></script>
+  <script src="draw2d.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
