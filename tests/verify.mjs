@@ -65,9 +65,15 @@ function check(name, ok, detail) {
   check('Fig. i fails 0.03 mm //-B zone when vertical crest exceeds tolerance',
     !resI.pass && resI.controlledError > 0.035,
     `e_ctrl=${resI.controlledError.toFixed(3)} > 0.030`);
+
+  // Preset carrier_fail ("Longitudinal Ripple (Fail I)") must actually fail
+  const resCF = P.solveTolerance(D.LAB_PRESETS.carrier_fail.params);
+  check('Preset carrier_fail ("Fail I") actually fails 0.050 mm zone',
+    !resCF.pass && resCF.controlledError > 0.05,
+    `e_ctrl=${resCF.controlledError.toFixed(4)} > 0.050`);
 }
 
-// 3. All figures, presets, and corner parameters remain finite
+// 3. All figures, presets, slider bounds, callout anchors, and ISO 1101 references remain consistent
 {
   let bad = 0;
   for (const id of D.FIGURE_ORDER) {
@@ -75,15 +81,80 @@ function check(name, ok, detail) {
     for (const p of [f.nominalParams, f.errorParams]) {
       const r = P.solveTolerance(p);
       if (!Number.isFinite(r.controlledError) || !Number.isFinite(r.flatnessError)) bad++;
+      if (!r.dofNoteEn || !r.dofNoteDe) bad++;
     }
   }
   for (const pid of Object.keys(D.LAB_PRESETS)) {
     const r = P.solveTolerance(D.LAB_PRESETS[pid].params);
     if (!Number.isFinite(r.controlledError) || !Number.isFinite(r.flatnessError)) bad++;
   }
-  check('All figures (f-i) & 6 lab presets defined and finite',
+  check('All figures (f-i) & 6 lab presets defined, finite, and bilingual',
     D.FIGURE_ORDER.length === 4 && Object.keys(D.LAB_PRESETS).length === 6 && D.TOUR_STOPS.length === 5 && bad === 0,
     `figs=${D.FIGURE_ORDER.length}, presets=${Object.keys(D.LAB_PRESETS).length}, bad=${bad}`);
+
+  // Slider bounds & step alignment check for all presets
+  const sliderBounds = {
+    toleranceMm: { min: 0.01, max: 0.10, step: 0.005 },
+    sliceFrac: { min: 0.0, max: 1.0, step: 0.02 },
+    exaggeration: { min: 80, max: 450, step: 20 },
+    bowLong: { min: -0.08, max: 0.08, step: 0.002 },
+    bowTrans: { min: -0.08, max: 0.08, step: 0.002 },
+    twist: { min: -0.10, max: 0.10, step: 0.002 },
+    bowVert: { min: -0.08, max: 0.08, step: 0.002 },
+    bowLat: { min: -0.08, max: 0.08, step: 0.002 },
+    harmonics: { min: 1, max: 4, step: 1 },
+  };
+  const boundErrs = [];
+  for (const [pid, pr] of Object.entries(D.LAB_PRESETS)) {
+    for (const [k, b] of Object.entries(sliderBounds)) {
+      if (pr.params[k] === undefined) continue;
+      const v = pr.params[k];
+      if (v < b.min - 1e-9 || v > b.max + 1e-9) {
+        boundErrs.push(`${pid}.${k}=${v} out of [${b.min},${b.max}]`);
+      }
+      const steps = (v - b.min) / b.step;
+      if (Math.abs(steps - Math.round(steps)) > 1e-6) {
+        boundErrs.push(`${pid}.${k}=${v} off step ${b.step}`);
+      }
+    }
+  }
+  check('All presets lie within Lab slider min/max bounds and exact steps',
+    boundErrs.length === 0,
+    boundErrs.length ? boundErrs.join('; ') : 'all 6 presets aligned');
+
+  // EN/DE callout anchor parity & above-plate check
+  const anchorErrs = [];
+  for (const id of D.FIGURE_ORDER) {
+    const f = D.FIGURES[id];
+    if (f.en.callouts.length !== f.de.callouts.length) {
+      anchorErrs.push(`${id} count mismatch`);
+      continue;
+    }
+    f.en.callouts.forEach((ce, idx) => {
+      const cd = f.de.callouts[idx];
+      if (JSON.stringify(ce.anchor) !== JSON.stringify(cd.anchor)) {
+        anchorErrs.push(`${id}.${ce.id} EN/DE anchor mismatch`);
+      }
+      if (ce.anchor[1] < 0) {
+        anchorErrs.push(`${id}.${ce.id} y=${ce.anchor[1]} below plate`);
+      }
+    });
+  }
+  check('EN & DE 3D callout anchors match identically and sit above base plate',
+    anchorErrs.length === 0,
+    anchorErrs.length ? anchorErrs.join('; ') : 'all 16 callouts aligned');
+
+  // ISO 1101:2017 normative references check
+  const std0 = D.FURTHER_READING.standards[0];
+  const badUrls = D.FURTHER_READING.standards.filter((s) => /40368|46416/.test(s.url));
+  check('ISO 1101:2017 clauses (§13, §14) & standard URLs valid',
+    std0.source.includes('§13') && std0.source.includes('§14') && badUrls.length === 0,
+    `source="${std0.source}", badUrls=${badUrls.length}`);
+
+  // formatTol preserves 0.005 increments
+  check('formatTol preserves 3rd decimal on 0.025 while formatting 0.05 cleanly',
+    D.formatTol(0.025, true) === '0,025' && D.formatTol(0.05, true) === '0,05',
+    `0.025->${D.formatTol(0.025, true)}, 0.05->${D.formatTol(0.05, true)}`);
 }
 
 console.log(`\nSummary: ${failed === 0 ? 'ALL CHECKS PASSED' : `${failed} FAILED`}`);

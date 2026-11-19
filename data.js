@@ -63,6 +63,8 @@
       relParallel: '// Parallel',
       relPerp: '⊥ Perp',
       labelDatum: 'Datum',
+      datA: 'A (Front)',
+      datB: 'B (Base)',
       groupDeform: 'Manufacturing Form Deviation',
       conceptsKicker: 'GEOMETRIC PRODUCT SPECIFICATION (ISO 1101:2017)',
       conceptsTitle: 'Straightness Laws & Engineering Notes',
@@ -82,16 +84,24 @@
       tryInLab: 'Simulate in Tolerance Lab →',
       showIn3d: 'Inspect in 3D →',
       kpiStraight: 'Max Straightness',
-      kpiFlatness: 'Flatness / 3D Span',
+      kpiFlatness: 'Flatness',
       kpiStatus: 'Zone Status',
       kpiSlice: 'Active Slice e(s)',
+      kpiSliceEdge: 'Local Band 2|r(s)|',
       kpiOrtho: 'Unconstrained Dir.',
+      overviewOpt: 'Overview — All 4 Plates',
       passWord: 'PASS',
       failWord: 'FAIL',
       prevStop: '← Prev',
       nextStop: 'Next →',
       autoPlay: '▶ Auto',
+      pausePlay: '⏸ Pause',
       finishTour: 'Open in Lab →',
+      titlePrevFig: 'Previous Plate',
+      titleNextFig: 'Next Plate',
+      titleSelectFig: 'Select Plate Case (I–IV)',
+      titleDisplayMode: '3D Display Layering',
+      titlePlayPause: 'Pause or resume probe sweep animation (Space)',
     },
     de: {
       brandTitle: 'GERADHEITSLABOR',
@@ -146,6 +156,8 @@
       relParallel: '// Parallel',
       relPerp: '⊥ Rechtwinklig',
       labelDatum: 'Bezug',
+      datA: 'A (Vorn)',
+      datB: 'B (Boden)',
       groupDeform: 'Geometrische Formabweichung',
       conceptsKicker: 'GEOMETRISCHE PRODUKTSPEZIFIKATION (ISO 1101:2017)',
       conceptsTitle: 'Geradheitsgesetze & Fachnotizen',
@@ -165,16 +177,24 @@
       tryInLab: 'Im Toleranzlabor testen →',
       showIn3d: 'In 3D ansehen →',
       kpiStraight: 'Max. Geradheit',
-      kpiFlatness: 'Ebenheit / 3D-Spanne',
+      kpiFlatness: 'Ebenheit',
       kpiStatus: 'Zonenbefund',
       kpiSlice: 'Aktiver Schnitt e(s)',
+      kpiSliceEdge: 'Lokalband 2|r(s)|',
       kpiOrtho: 'Freie Richtung',
+      overviewOpt: 'Übersicht — Alle 4 Tafeln',
       passWord: 'IO (PASS)',
       failWord: 'NIO (FAIL)',
       prevStop: '← Zurück',
       nextStop: 'Weiter →',
       autoPlay: '▶ Auto',
+      pausePlay: '⏸ Pause',
       finishTour: 'Im Labor öffnen →',
+      titlePrevFig: 'Vorherige Tafel',
+      titleNextFig: 'Nächste Tafel',
+      titleSelectFig: 'Tafelfall wählen (I–IV)',
+      titleDisplayMode: '3D-Darstellungsmodus',
+      titlePlayPause: 'Tastbewegung pausieren oder fortsetzen (Leertaste)',
     },
   };
 
@@ -182,7 +202,10 @@
     fig_f: {
       id: 'fig_f',
       code: 'PLATE I',
+      codeDe: 'TAFEL I',
       plate: 'Plate I · // A',
+      plateDe: 'Tafel I · // A',
+      relTag: '// A',
       fcf: { sym: 'straightness', tol: '0,05', capType: 'intersection', rel: 'parallel', datum: 'A', terminator: 'dot' },
       en: {
         name: 'Intersection Plane Parallel to Datum A',
@@ -198,28 +221,32 @@
             id: 'ff_dot',
             title: 'Surface Leader Dot (•)',
             badge: '3D Face Target',
-            anchor: [-0.28, 0.36, 0.0],
+            anchor: [-0.32, 0.52, 0.0],
+            explodeFactor: 0,
             body: 'In ISO 1101 / 3D MBD, a filled dot ending on the face (rather than an arrow on an edge) identifies the entire planar surface from which line elements are cut.',
           },
           {
             id: 'ff_cap',
             title: 'Intersection Cap ⟨[ // | A ]',
             badge: 'Single Left Wedge',
-            anchor: [0.38, 0.78, 0.0],
+            anchor: [0.68, 0.84, 0.0],
+            explodeFactor: 0.45,
             body: 'One left-pointing triangular cap denotes an Intersection Plane Indicator. All cutting planes are oriented parallel to Datum A.',
           },
           {
             id: 'ff_lines',
             title: 'Longitudinal Dashed Elements',
             badge: 'Parallel to A',
-            anchor: [-0.85, 0.48, -0.22],
+            anchor: [-0.75, 0.51, -0.22],
+            explodeFactor: 1.0,
             body: 'Only lines running lengthwise along A must stay straight within 0.05 mm. Transverse cupping across the width is unconstrained!',
           },
           {
             id: 'ff_datum',
             title: 'Datum A Front Face',
             badge: 'Reference Plane',
-            anchor: [-0.25, 0.14, 0.48],
+            anchor: [-0.35, 0.22, 0.46],
+            explodeFactor: 0,
             body: 'Front vertical face established as Datum A aligns the family of parallel inspection planes.',
           },
         ],
@@ -238,28 +265,32 @@
             id: 'ff_dot',
             title: 'Flächenpunkt am Pfeilende (•)',
             badge: '3D-Flächenbezug',
-            anchor: [-0.28, 0.36, 0.0],
+            anchor: [-0.32, 0.52, 0.0],
+            explodeFactor: 0,
             body: 'Der ausgefüllte Punkt direkt auf der Fläche zeigt im 3D-Modell an, dass Linien auf dieser Fläche durch Schnittebenen definiert werden.',
           },
           {
             id: 'ff_cap',
             title: 'Schnittebenenindikator ⟨[ // | A ]',
             badge: 'Linke Spitze',
-            anchor: [-0.10, 0.86, 0.0],
+            anchor: [0.68, 0.84, 0.0],
+            explodeFactor: 0.45,
             body: 'Das linksseitig zugespitzte Kästchen kennzeichnet die Schnittebene: alle Schnitte erfolgen parallel zur Bezugsebene A.',
           },
           {
             id: 'ff_lines',
             title: 'Tolerierte Längslinien',
             badge: 'Parallel zu A',
-            anchor: [-0.30, 0.38, -0.22],
+            anchor: [-0.75, 0.51, -0.22],
+            explodeFactor: 1.0,
             body: 'Nur Linien in Längsrichtung parallel zu A müssen innerhalb 0,05 mm gerade sein. Eine Querwölbung der Fläche bleibt frei!',
           },
           {
             id: 'ff_datum',
             title: 'Bezugsfläche A (Vorderseite)',
             badge: 'Bezugsebene',
-            anchor: [-0.25, 0.14, 0.48],
+            anchor: [-0.35, 0.22, 0.46],
+            explodeFactor: 0,
             body: 'Die vordere Vertikalfläche A legt die Ausrichtung der parallelen Schnittebenen fest.',
           },
         ],
@@ -294,7 +325,10 @@
     fig_g: {
       id: 'fig_g',
       code: 'PLATE II',
+      codeDe: 'TAFEL II',
       plate: 'Plate II · ⊥ A',
+      plateDe: 'Tafel II · ⊥ A',
+      relTag: '⊥ A',
       fcf: { sym: 'straightness', tol: '0,05', capType: 'intersection', rel: 'perp', datum: 'A', terminator: 'dot' },
       en: {
         name: 'Intersection Plane Perpendicular to Datum A',
@@ -310,28 +344,32 @@
             id: 'fg_dot',
             title: 'Surface Leader Dot (•)',
             badge: '3D Face Target',
-            anchor: [-0.28, 0.36, 0.0],
+            anchor: [-0.32, 0.52, 0.0],
+            explodeFactor: 0,
             body: 'Leader ends in a filled dot on the top face, pairing with the intersection plane box to define transverse surface slices.',
           },
           {
             id: 'fg_cap',
             title: 'Intersection Cap ⟨[ ⊥ | A ]',
             badge: 'Perpendicular Cuts',
-            anchor: [-0.10, 0.86, 0.0],
+            anchor: [0.68, 0.84, 0.0],
+            explodeFactor: 0.45,
             body: 'Cutting planes stand at 90° to Datum A, slicing across the width of the chamfered block.',
           },
           {
             id: 'fg_lines',
             title: 'Transverse Dashed Elements',
             badge: 'Cross-Section ⊥ A',
-            anchor: [-0.28, 0.38, 0.14],
+            anchor: [-0.45, 0.52, 0.16],
+            explodeFactor: 1.0,
             body: 'Even if the bar bows lengthwise along its span, every transverse slice remains straight and passes within 0.05 mm!',
           },
           {
             id: 'fg_datum',
             title: 'Datum A Front Face',
             badge: 'Reference Plane',
-            anchor: [-0.25, 0.14, 0.48],
+            anchor: [-0.35, 0.22, 0.46],
+            explodeFactor: 0,
             body: 'Normal to front face A defines the direction of the transverse cutting planes.',
           },
         ],
@@ -350,28 +388,32 @@
             id: 'fg_dot',
             title: 'Flächenpunkt am Pfeilende (•)',
             badge: '3D-Flächenbezug',
-            anchor: [-0.28, 0.36, 0.0],
+            anchor: [-0.32, 0.52, 0.0],
+            explodeFactor: 0,
             body: 'Der Punkt auf der oberen Fläche zeigt an, dass aus dieser Fläche Schnittlinien extrahiert werden.',
           },
           {
             id: 'fg_cap',
             title: 'Schnittebenenindikator ⟨[ ⊥ | A ]',
             badge: 'Querschnitte ⊥ A',
-            anchor: [-0.10, 0.86, 0.0],
+            anchor: [0.68, 0.84, 0.0],
+            explodeFactor: 0.45,
             body: 'Die Schnittebenen stehen rechtwinklig (90°) auf der vorderen Bezugsfläche A.',
           },
           {
             id: 'fg_lines',
             title: 'Tolerierte Querlinien',
             badge: 'Profilquerschnitt',
-            anchor: [-0.28, 0.38, 0.14],
+            anchor: [-0.45, 0.52, 0.16],
+            explodeFactor: 1.0,
             body: 'Selbst bei starker Längsdurchbiegung bleibt jeder Querschnitt ⊥ A gerade – die Spezifikation wird erfüllt!',
           },
           {
             id: 'fg_datum',
             title: 'Bezugsfläche A (Vorderseite)',
             badge: 'Bezugsebene',
-            anchor: [-0.25, 0.14, 0.48],
+            anchor: [-0.35, 0.22, 0.46],
+            explodeFactor: 0,
             body: 'Die Bezugsebene A definiert die Flächennormale für alle orthogonalen Schnitte.',
           },
         ],
@@ -406,7 +448,10 @@
     fig_h: {
       id: 'fig_h',
       code: 'PLATE III',
+      codeDe: 'TAFEL III',
       plate: 'Plate III · ⊥ A',
+      plateDe: 'Tafel III · ⊥ A',
+      relTag: '⊥ A',
       fcf: { sym: 'straightness', tol: '0,02', capType: 'orientation', rel: 'perp', datum: 'A', terminator: 'arrow' },
       en: {
         name: 'Orientation Plane Perpendicular to Datum A',
@@ -415,36 +460,40 @@
         summary:
           'Applies a 0.02 mm straightness zone to the sharp ridge edge. The double-wedge Orientation Plane Indicator fixes the pair of parallel boundary planes perpendicular to Datum A.',
         bookNote:
-          'Without an orientation plane indicator in 3D MBD, a pair of parallel planes containing a 1D edge would rotate freely around that edge. Specifying ⊥ A locks the zone distance t_G along face A.',
+          'Without an orientation plane indicator in 3D MBD, a pair of parallel planes containing a 1D line would rotate freely around it. Specifying ⊥ A locks the roll orientation while keeping straightness pitch tilt free (note: ISO 1101:2017 §14 formally defines orientation planes for median lines, extended here to a 1D knife-edge illustration).',
         bookPage: 'Plate III · Case ⊥ A',
         callouts: [
           {
             id: 'fh_arrow',
             title: 'Edge Arrowhead (▼)',
             badge: '1D Edge Feature',
-            anchor: [-0.51, 0.56, 0.22],
+            anchor: [-0.51, 0.57, 0.24],
+            explodeFactor: 0,
             body: 'Unlike Plates I & II, the leader ends in a sharp arrowhead touching the top ridge edge—tolerating that 1D line directly.',
           },
           {
             id: 'fh_cap',
             title: 'Orientation Cap ⟨[ ⊥ | A ]⟩',
             badge: 'Double Wedge',
-            anchor: [0.46, 0.92, 0.22],
+            anchor: [0.50, 0.86, 0.24],
+            explodeFactor: 0.35,
             body: 'Pointed caps on BOTH sides signify an Orientation Plane Indicator: the two parallel planes t_G apart are oriented ⊥ to A.',
           },
           {
             id: 'fh_zone',
             title: 'Parallel Planes t_G = 0.02 mm',
             badge: '90° to Datum A',
-            anchor: [0.65, 0.56, 0.22],
+            anchor: [0.68, 0.57, 0.24],
+            explodeFactor: 1.0,
             body: 'Vertical edge height waviness along A is constrained within 0.02 mm, while sideways sway normal to A stays between the planes.',
           },
           {
             id: 'fh_datum',
             title: 'Datum A Front Face',
             badge: 'Orientation Reference',
-            anchor: [0.05, 0.10, 0.25],
-            body: 'Front face A fixes the 90° orientation of the tolerance-zone planes (note the right-angle symbol in the end section).',
+            anchor: [0.05, 0.24, 0.24],
+            explodeFactor: 0,
+            body: 'Front face A fixes the 90° roll orientation of the tolerance-zone planes (note the right-angle symbol in the end section).',
           },
         ],
       },
@@ -455,36 +504,40 @@
         summary:
           'Begrenzt die Geradheit der oberen Prismenkante auf 0,02 mm zwischen zwei parallelen Ebenen, deren Lage durch die Doppelspitze rechtwinklig zu Bezug A fixiert wird.',
         bookNote:
-          'Im 3D-Modell fehlt eine eindeutige Zeichenebene. Der Orientierungsebenenindikator legt fest, in welcher Richtung der Abstand t_G der zwei parallelen Ebenen gemessen wird (hier ⊥ A).',
+          'Im 3D-Modell fehlt eine eindeutige Zeichenebene. Der Orientierungsebenenindikator fixiert die Rollrichtung der beiden parallelen Ebenen (⊥ A), während die Längsneigung für Geradheit frei bleibt (Hinweis: ISO 1101:2017 §14 definiert Orientierungsebenen formal für abgeleitete Linien, hier anschaulich an einer Schneidkante dargestellt).',
         bookPage: 'Tafel III · Fall ⊥ A',
         callouts: [
           {
             id: 'fh_arrow',
             title: 'Pfeilspitze auf Kante (▼)',
             badge: 'Linien-/Kantenbezug',
-            anchor: [-0.51, 0.56, 0.22],
+            anchor: [-0.51, 0.57, 0.24],
+            explodeFactor: 0,
             body: 'Der Toleranzpfeil endet mit einer Pfeilspitze direkt auf der oberen Kante – toleriert wird diese Kante als Linie.',
           },
           {
             id: 'fh_cap',
             title: 'Orientierungsebenenindikator ⟨[ ⊥ | A ]⟩',
             badge: 'Doppelspitze',
-            anchor: [0.46, 0.92, 0.22],
+            anchor: [0.50, 0.86, 0.24],
+            explodeFactor: 0.35,
             body: 'Spitzen auf BEIDEN Seiten kennzeichnen den Orientierungsebenenindikator: Die Begrenzungsebenen stehen rechtwinklig auf A.',
           },
           {
             id: 'fh_zone',
             title: 'Parallele Ebenen t_G = 0,02 mm',
             badge: '90° zu Bezug A',
-            anchor: [0.65, 0.56, 0.22],
+            anchor: [0.68, 0.57, 0.24],
+            explodeFactor: 1.0,
             body: 'Höhenwelligkeit entlang A wird auf 0,02 mm begrenzt; seitliches Ausweichen quer zu A bleibt innerhalb der unendlichen Ebenen.',
           },
           {
             id: 'fh_datum',
             title: 'Bezugsfläche A (Vorderseite)',
             badge: 'Orientierungsbezug',
-            anchor: [0.05, 0.10, 0.25],
-            body: 'Fläche A bestimmt die 90°-Ausrichtung der parallelen Zonenebenen (im Querschnitt mit Rechtwinkelsymbol markiert).',
+            anchor: [0.05, 0.24, 0.24],
+            explodeFactor: 0,
+            body: 'Fläche A bestimmt die 90°-Rollausrichtung der parallelen Zonenebenen (im Querschnitt mit Rechtwinkelsymbol markiert).',
           },
         ],
       },
@@ -516,85 +569,96 @@
     fig_i: {
       id: 'fig_i',
       code: 'PLATE IV',
+      codeDe: 'TAFEL IV',
       plate: 'Plate IV · // B',
+      plateDe: 'Tafel IV · // B',
+      relTag: '// B',
       fcf: { sym: 'straightness', tol: '0,03', capType: 'orientation', rel: 'parallel', datum: 'B', terminator: 'arrow' },
       en: {
         name: 'Orientation Plane Parallel to Datum B',
-        subtitle: 'Double-Wedge ⟨[ // | B ]⟩ · Two Parallel Planes // B',
+        subtitle: 'Double-Wedge ⟨[ // | B ]⟩ · Roll-Locked Zone // B',
         category: 'Orientation Plane',
         summary:
-          'Applies a 0.03 mm straightness zone to the upper ridge edge bounded by two parallel planes oriented parallel to the underside Datum B.',
+          'Applies a 0.03 mm straightness zone to the upper ridge edge using an orientation plane parallel to underside Datum B to lock the roll orientation while keeping straightness pitch tilt free.',
         bookNote:
-          'Referencing bottom Datum B with // achieves the same vertical height-control zone as ⊥ A in Plate III, locking the separation t_G perpendicular to mounting surface B.',
+          'Referencing bottom Datum B with // locks the same vertical height-control direction as ⊥ A in Plate III. Because the callout is straightness (—) with no datum in the tolerance frame, longitudinal pitch tilt remains free—unlike parallelism [ // | 0,03 | B ].',
         bookPage: 'Plate IV · Case // B',
         callouts: [
           {
             id: 'fi_arrow',
             title: 'Edge Arrowhead (▼)',
             badge: 'Top Ridge Edge',
-            anchor: [-0.51, 0.66, -0.22],
+            anchor: [-0.51, 0.69, -0.21],
+            explodeFactor: 0,
             body: 'Points squarely onto the top sharp edge of the wedge bar so straightness of that ridge is controlled.',
           },
           {
             id: 'fi_cap',
             title: 'Orientation Cap ⟨[ // | B ]⟩',
             badge: 'Double Wedge',
-            anchor: [0.46, 1.00, -0.22],
-            body: 'Double-pointed indicator specifies that the tolerance zone consists of two parallel planes running parallel (//) to bottom Datum B.',
+            anchor: [0.50, 0.98, -0.21],
+            explodeFactor: 0.35,
+            body: 'Double-pointed indicator aligns the roll orientation of the parallel-plane zone to bottom Datum B while leaving longitudinal straightness pitch tilt free.',
           },
           {
             id: 'fi_zone',
             title: 'Parallel Zone t_G = 0.03 mm',
-            badge: 'Parallel to B',
-            anchor: [0.35, 0.56, -0.22],
-            body: 'Any vertical crest exceeding the 0.03 mm height envelope parallel to B fails immediately (highlighted in vermilion).',
+            badge: 'Height Control',
+            anchor: [0.55, 0.68, -0.22],
+            explodeFactor: 1.0,
+            body: 'Any vertical crest exceeding the 0.03 mm minimum-zone corridor fails immediately (highlighted in vermilion).',
           },
           {
             id: 'fi_datum',
             title: 'Datum B Underside Face',
             badge: 'Mounting Base',
-            anchor: [0.08, -0.10, 0.05],
-            body: 'Datum triangle attached via leader dot to the bottom planar surface B; the // marks in the end section align the zone to B.',
+            anchor: [-0.24, 0.18, 0.45],
+            explodeFactor: 0,
+            body: 'Datum triangle attached via leader dot to the bottom planar surface B; the // marks in the end section align the zone roll orientation to B.',
           },
         ],
       },
       de: {
         name: 'Orientierungsebenenindikator parallel zu B',
-        subtitle: 'Doppelspitze ⟨[ // | B ]⟩ · Parallele Ebenen // B',
+        subtitle: 'Doppelspitze ⟨[ // | B ]⟩ · Roll-fixierte Zone // B',
         category: 'Orientierung',
         summary:
-          'Begrenzt die Geradheit der oberen Schneidkante auf 0,03 mm zwischen zwei parallelen Ebenen, die parallel zur unteren Bezugsfläche B liegen.',
+          'Begrenzt die Geradheit der oberen Schneidkante auf 0,03 mm zwischen zwei parallelen Ebenen, deren Rollausrichtung über Bezug B festgelegt wird (Längsneigung bleibt für Geradheit frei).',
         bookNote:
-          'Der Bezug auf die Unterseite B mit // erzeugt physikalisch dieselbe vertikale Zonenausrichtung wie ⊥ A in Tafel III – der Abstand t_G wird senkrecht zur Auflagefläche B gemessen.',
+          'Der Bezug auf die Unterseite B mit // erzeugt dieselbe vertikale Prüfrichtung wie ⊥ A in Tafel III. Da im Toleranzrahmen Geradheit (—) ohne Bezug steht, bleibt die Längsneigung der Zone frei – im Unterschied zur Parallelität [ // | 0,03 | B ].',
         bookPage: 'Tafel IV · Fall // B',
         callouts: [
           {
             id: 'fi_arrow',
             title: 'Pfeilspitze auf Oberkante (▼)',
             badge: 'Tolerierte Kante',
-            anchor: [-0.51, 0.66, -0.22],
+            anchor: [-0.51, 0.69, -0.21],
+            explodeFactor: 0,
             body: 'Trifft direkt auf die obere Kante des Keilkörpers und weist ihr die Geradheitstoleranz 0,03 mm zu.',
           },
           {
             id: 'fi_cap',
             title: 'Orientierungsebenenindikator ⟨[ // | B ]⟩',
             badge: 'Doppelspitze',
-            anchor: [0.46, 1.00, -0.22],
-            body: 'Die beidseitige Spitze legt fest, dass die beiden Zonenebenen im Abstand t_G parallel (//) zur Grundfläche B liegen.',
+            anchor: [0.50, 0.98, -0.21],
+            explodeFactor: 0.35,
+            body: 'Die beidseitige Spitze legt die Rollausrichtung der Zonenebenen zur Grundfläche B fest, ohne eine starre Parallelität in Längsrichtung zu erzwingen.',
           },
           {
             id: 'fi_zone',
             title: 'Parallele Zonenebenen t_G = 0,03 mm',
-            badge: 'Parallel zu B',
-            anchor: [0.35, 0.56, -0.22],
-            body: 'Überschreitet die Kantenwelligkeit vertikal den 0,03-mm-Korridor parallel zu B, wird die Verletzung zinnoberrot markiert.',
+            badge: 'Höhenkontrolle',
+            anchor: [0.55, 0.68, -0.22],
+            explodeFactor: 1.0,
+            body: 'Überschreitet die Kantenwelligkeit vertikal den 0,03-mm-Minimum-Zone-Korridor, wird die Verletzung zinnoberrot markiert.',
           },
           {
             id: 'fi_datum',
             title: 'Bezugsfläche B (Unterseite)',
             badge: 'Auflagefläche',
-            anchor: [0.08, -0.10, 0.05],
-            body: 'Bezugszeichen B auf der Bodenfläche; die //-Striche im rechten Querschnitt koppeln beide Zonenebenen an B.',
+            anchor: [-0.24, 0.18, 0.45],
+            explodeFactor: 0,
+            body: 'Bezugszeichen B auf der Bodenfläche; die //-Striche im Querschnitt zeigen die Ausrichtung der Zonenebenen zu B.',
           },
         ],
       },
@@ -615,7 +679,7 @@
         datum: 'B',
         toleranceMm: 0.03,
         bowVert: 0.052,
-        bowLat: 0.015,
+        bowLat: 0.016,
         harmonics: 3,
         sliceFrac: 0.5,
         exaggeration: 280,
@@ -675,7 +739,7 @@
         planeRelation: 'parallel',
         datum: 'A',
         toleranceMm: 0.05,
-        bowLong: 0.068,
+        bowLong: 0.078,
         bowTrans: 0.02,
         twist: 0.0,
         harmonics: 2,
@@ -758,7 +822,7 @@
         'Each extracted line is bracketed by two parallel straight lines minimizing their perpendicular separation inside the active plane.',
       bodyDe:
         'Jede extrahierte Profillinie wird von zwei parallelen Geraden minimalen senkrechten Abstands in der jeweiligen Ebene eingeschlossen.',
-      math: 'e_{\\text{str}} = \\min_{m,\\,c}\\; \\frac{\\max_i (y_i - m t_i) - \\min_i (y_i - m t_i)}{\\sqrt{1 + m^2}} \\le t_G',
+      math: 'e_{\\text{str}} = \\min_{m}\\; \\frac{\\max_i (y_i - m t_i) - \\min_i (y_i - m t_i)}{\\sqrt{1 + m^2}} \\le t_G',
     },
     {
       id: 'inter_vs_orient',
@@ -788,10 +852,10 @@
       titleEn: 'Straightness Is Not Flatness (Ruled Twist)',
       titleDe: 'Geradheit ≠ Ebenheit (Verwindungsfläche)',
       bodyEn:
-        'On a bilinearly twisted surface y = τ(2u−1)(2v−1), every cut parallel to A and every cut perpendicular to A is identically straight—yet flatness is 2τ!',
+        'On a bilinearly twisted surface y = (τ/2)(2u−1)(2v−1), every cut parallel to A and every cut perpendicular to A is identically straight (e = 0)—yet minimum-zone flatness equals |τ|!',
       bodyDe:
-        'Auf einer verwundenen Regelfläche y = τ(2u−1)(2v−1) sind alle Schnitte // A und ⊥ A exakt gerade (e = 0), doch die Ebenheit beträgt 2τ!',
-      math: 'e_{\\text{str}}(\\parallel A) = 0, \\quad e_{\\text{str}}(\\perp A) = 0, \\quad e_{\\text{flat}} \\approx \\tau > 0',
+        'Auf einer verwundenen Regelfläche y = (τ/2)(2u−1)(2v−1) sind alle Schnitte // A und ⊥ A exakt gerade (e = 0), doch die Minimum-Zone-Ebenheit beträgt exakt |τ|!',
+      math: 'e_{\\text{str}}(\\parallel A) = 0, \\quad e_{\\text{str}}(\\perp A) = 0, \\quad e_{\\text{flat}} = |\\tau| > 0',
     },
     {
       id: 'dof_orient',
@@ -799,20 +863,20 @@
       titleEn: 'Rotational DOF of a 3D Edge Zone',
       titleDe: 'Rotations-Freiheitsgrad einer 3D-Kante',
       bodyEn:
-        'Two parallel planes along direction û retain one rotational angle θ around û. Setting ⊥ A or // B locks the normal vector n̂_zone unambiguously.',
+        'Two parallel planes along direction û retain one roll angle θ around û. Setting ⊥ A or // B locks that roll direction while leaving longitudinal pitch tilt free (unlike parallelism [// | t | B]).',
       bodyDe:
-        'Zwei parallele Ebenen entlang û behalten einen Drehwinkel θ um die Kante. Erst ⊥ A oder // B fixiert die Zonennormale n̂_Zone.',
-      math: '\\hat{\\mathbf{n}}_{\\text{zone}} = \\begin{cases} \\hat{\\mathbf{y}} \\parallel A & \\langle[\\perp | A]\\rangle \\\\ \\hat{\\mathbf{y}} \\perp B & \\langle[\\parallel | B]\\rangle \\end{cases}',
+        'Zwei parallele Ebenen entlang û behalten einen Rollwinkel θ um die Kante. Erst ⊥ A oder // B fixiert die Rollrichtung, während die Längsneigung frei bleibt (anders als bei Parallelität [// | t | B]).',
+      math: '\\hat{\\mathbf{n}}_{\\text{zone}} \\perp \\hat{\\mathbf{z}} \\quad \\text{(roll locked by }\\perp A\\text{ or }\\parallel B\\text{; pitch free)}',
     },
     {
       id: 'diagonal_warn',
-      preset: 'carrier_fail',
+      preset: 'twist_paradox',
       titleEn: 'Why Diagonal Checking Breaks Intent',
       titleDe: 'Warum Diagonalprüfung unzulässig ist',
       bodyEn:
-        'Checking diagonally across a bowed surface mixes longitudinal and transverse curvature, turning directional line straightness effectively into full flatness.',
+        'Checking diagonally across a bowed or twisted surface mixes longitudinal and transverse curvature, turning directional line straightness effectively into full flatness.',
       bodyDe:
-        'Diagonalprüfungen über eine gewölbte Fläche vermischen Längs- und Querkrümmung – damit würde faktisch Ebenheit statt gerichteter Geradheit geprüft.',
+        'Diagonalprüfungen über eine gewölbte oder verwundene Fläche vermischen Längs- und Querkrümmung – damit würde faktisch Ebenheit statt gerichteter Geradheit geprüft.',
       math: 'e_{\\text{str}}(\\text{diag}) \\le e_{\\text{flat}}, \\qquad e_{\\text{str}}(\\text{diag}) \\not\\le \\max(e_\\parallel, e_\\perp)',
     },
   ];
@@ -844,11 +908,11 @@
   const FURTHER_READING = {
     standards: [
       {
-        source: 'ISO 1101:2017 · §16 & §17',
+        source: 'ISO 1101:2017 · §13, §14 & §17.2',
         titleEn: 'Geometrical Product Specifications (GPS) — Geometrical Tolerancing',
         titleDe: 'Geometrische Produktspezifikation (GPS) — Geometrische Tolerierung',
-        descEn: 'Normative definition of Intersection Plane Indicators ⟨[...|...] and Orientation Plane Indicators ⟨[...]⟩ for 3D MBD and 2D drawings.',
-        descDe: 'Normative Festlegung von Schnittebenenindikator ⟨[...|...] und Orientierungsebenenindikator ⟨[...]⟩ im 3D- und 2D-Bereich.',
+        descEn: 'Normative definition of Intersection Plane Indicators (§13), Orientation Plane Indicators (§14), and Straightness (§17.2) for 3D MBD and 2D drawings.',
+        descDe: 'Normative Festlegung von Schnittebenenindikator (§13), Orientierungsebenenindikator (§14) und Geradheit (§17.2) im 3D- und 2D-Bereich.',
         url: 'https://www.iso.org/standard/66777.html',
       },
       {
@@ -857,15 +921,15 @@
         titleDe: 'Geometrische Tolerierung — Bezüge und Bezugssysteme',
         descEn: 'Defines datum features A and B and datum surface indicators (filled triangle + leader dot) used to orient plane indicators.',
         descDe: 'Definiert Bezugselemente A und B sowie die Kennzeichnung von Bezugsflächen im 3D-Modell (Dreieck und Flächenpunkt).',
-        url: 'https://www.iso.org/standard/40368.html',
+        url: 'https://www.iso.org/obp/ui/#iso:std:iso:5459:ed-3:v1:en',
       },
       {
         source: 'ISO 12780-1 / -2',
         titleEn: 'Straightness Vocabulary, Parameters & Verification Operators',
         titleDe: 'Geradheit — Begriffe, Kenngrößen und Prüfoperatoren',
-        descEn: 'Formalizes Chebyshev (MZST) straightness zone evaluation and extraction strategies along specified intersection lines.',
-        descDe: 'Beschreibt die Minimum-Zone-Auswertung (MZST) sowie Messstrategien entlang definierter Schnittlinien.',
-        url: 'https://www.iso.org/standard/46416.html',
+        descEn: 'Formalizes peak-to-valley straightness STRt with Minimum-Zone Reference Straight Line (MZLI) and extraction strategies along specified intersection lines.',
+        descDe: 'Beschreibt die Gesamtabweichung der Geradheit STRt mit Minimum-Zone-Referenzgerade (MZLI) sowie Messstrategien entlang definierter Schnittlinien.',
+        url: 'https://www.iso.org/obp/ui/#iso:std:iso:12780:-1:ed-1:v1:en',
       },
     ],
     books: [
@@ -888,6 +952,19 @@
     ],
   };
 
+  // Format tolerance cleanly without rounding away 0.005 mm increments (e.g., 0.025 -> "0,025", 0.05 -> "0,05")
+  function formatTol(val, useComma = true) {
+    const n = Number(val ?? 0.05);
+    const s3 = n.toFixed(3);
+    const str = s3.endsWith('0') ? n.toFixed(2) : s3;
+    return useComma ? str.replace('.', ',') : str;
+  }
+
+  function formatNum(val, decimals, lang = 'en') {
+    const s = Number(val ?? 0).toFixed(decimals);
+    return lang === 'de' ? s.replace('.', ',') : s;
+  }
+
   // Generate razor-sharp ISO 1101:2017 Feature Control Frame SVG string
   function renderFcfSvg(fcf, opts = {}) {
     const compact = Boolean(opts.compact);
@@ -895,7 +972,7 @@
     const x0 = 2;
     const y0 = 2;
     const box1W = 34;
-    const box2W = 54;
+    const box2W = 58;
     const capX = x0 + box1W + box2W;
     const wedge = 11;
     const relW = 28;
@@ -905,7 +982,9 @@
     const capEnd = capMidX + datW;
     const rightPoint = fcf.capType === 'orientation';
     const totalW = capEnd + (rightPoint ? wedge : 0) + 4;
-    const tolText = String(fcf.tol ?? '0,05').replace('.', ',');
+    const tolText = typeof fcf.tol === 'number'
+      ? formatTol(fcf.tol, true)
+      : String(fcf.tol ?? '0,05').replace('.', ',');
     const relSym = fcf.rel === 'parallel'
       ? `<line x1="${capBodyStart + 8}" y1="${y0 + 25}" x2="${capBodyStart + 15}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/><line x1="${capBodyStart + 15}" y1="${y0 + 25}" x2="${capBodyStart + 22}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/>`
       : `<line x1="${capBodyStart + 6}" y1="${y0 + 24}" x2="${capBodyStart + 22}" y2="${y0 + 24}" stroke="#181715" stroke-width="2"/><line x1="${capBodyStart + 14}" y1="${y0 + 24}" x2="${capBodyStart + 14}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/>`;
@@ -920,7 +999,7 @@
         <rect x="${x0}" y="${y0}" width="${box1W + box2W}" height="${h}" fill="#faf5e8" stroke="#181715" stroke-width="1.8"/>
         <line x1="${x0 + box1W}" y1="${y0}" x2="${x0 + box1W}" y2="${y0 + h}" stroke="#181715" stroke-width="1.6"/>
         <line x1="${x0 + 8}" y1="${y0 + h / 2}" x2="${x0 + box1W - 8}" y2="${y0 + h / 2}" stroke="#181715" stroke-width="2.2"/>
-        <text x="${x0 + box1W + box2W / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#181715">${tolText}</text>
+        <text x="${x0 + box1W + box2W / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13.5" font-weight="700" fill="#181715">${tolText}</text>
         <polygon points="${capPoly}" fill="#f6efe0" stroke="#d94426" stroke-width="1.8" stroke-linejoin="round"/>
         <line x1="${capBodyStart}" y1="${y0}" x2="${capBodyStart}" y2="${y0 + h}" stroke="#d94426" stroke-width="1.3"/>
         <line x1="${capMidX}" y1="${y0}" x2="${capMidX}" y2="${y0 + h}" stroke="#d94426" stroke-width="1.3"/>
@@ -939,6 +1018,8 @@
     CONCEPTS,
     BOOK_PARAGRAPHS,
     FURTHER_READING,
+    formatTol,
+    formatNum,
     renderFcfSvg,
   };
 })(window);

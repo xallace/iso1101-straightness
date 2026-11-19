@@ -9,6 +9,17 @@
     return v < lo ? lo : v > hi ? hi : v;
   }
 
+  function fmtTol(val, isDe) {
+    const s3 = Number(val ?? 0).toFixed(3);
+    const s = s3.endsWith('0') ? Number(val ?? 0).toFixed(2) : s3;
+    return isDe ? s.replace('.', ',') : s;
+  }
+
+  function fmtNum(val, decimals, isDe) {
+    const s = Number(val ?? 0).toFixed(decimals);
+    return isDe ? s.replace('.', ',') : s;
+  }
+
   function prepareCanvas(canvas) {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const rect = canvas.getBoundingClientRect();
@@ -135,8 +146,9 @@
         }
       });
 
-      // Moving probe marker
-      const pulse = 0.5 - 0.5 * Math.cos((timeSec * 1.4) % (Math.PI * 2));
+      // Moving probe marker (synchronized with 3D probe: speed=0.28, phase=0.2)
+      const uSweep = ((timeSec * 0.28 + 0.2) % 1.0 + 1.0) % 1.0;
+      const pulse = 0.5 - 0.5 * Math.cos(uSweep * Math.PI * 2);
       const pIdx = Math.min(pts.length - 1, Math.round(pulse * (pts.length - 1)));
       if (pts[pIdx]) {
         const pt = pts[pIdx];
@@ -174,7 +186,7 @@
       ctx.textAlign = 'right';
       const ok = res.activeSliceError <= p.toleranceMm + 1e-9;
       ctx.fillStyle = ok ? '#047857' : '#b91c1c';
-      ctx.fillText(`e = ${res.activeSliceError.toFixed(3)} / ${p.toleranceMm.toFixed(2)} mm`, w - 10, 16);
+      ctx.fillText(`e = ${fmtNum(res.activeSliceError, 3, isDe)} / ${fmtTol(p.toleranceMm, isDe)} mm`, w - 10, 16);
 
       ctx.fillStyle = '#4b463e';
       ctx.font = '10px "JetBrains Mono", monospace';
@@ -202,31 +214,30 @@
     );
     ctx.textAlign = 'right';
     ctx.fillStyle = res.pass ? '#047857' : '#b91c1c';
-    ctx.fillText(`e = ${res.controlledError.toFixed(3)} / ${p.toleranceMm.toFixed(2)} mm`, w - 10, 16);
+    ctx.fillText(`e = ${fmtNum(res.controlledError, 3, isDe)} / ${fmtTol(p.toleranceMm, isDe)} mm`, w - 10, 16);
 
-    // Draw broken wedge cross-section (Cases III / IV)
-    const tipX = cx + 26;
-    const tipY = cy - 28;
+    // Draw broken wedge cross-section (Cases III / IV) with true vertical Datum A / horizontal Datum B
+    const tipX = cx + 24;
+    const tipY = cy - 26;
 
     ctx.save();
-    // Broken cross-section silhouette
     ctx.fillStyle = '#faf5e8';
     ctx.strokeStyle = '#181715';
     ctx.lineWidth = 2.0;
     ctx.beginPath();
     if (!isDatumB) {
-      // Fig h style: tall steep right face = Datum A
+      // Fig h style: strictly vertical right face = Datum A (matches 3D wall z = zMax)
       ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX - 6, tipY + 72);
-      ctx.quadraticCurveTo(tipX - 24, tipY + 66, tipX - 38, tipY + 72);
-      ctx.bezierCurveTo(tipX - 44, tipY + 52, tipX - 32, tipY + 38, tipX - 40, tipY + 24);
+      ctx.lineTo(tipX, tipY + 70);
+      ctx.quadraticCurveTo(tipX - 20, tipY + 65, tipX - 36, tipY + 70);
+      ctx.bezierCurveTo(tipX - 42, tipY + 50, tipX - 30, tipY + 36, tipX - 38, tipY + 22);
       ctx.lineTo(tipX, tipY);
     } else {
-      // Fig i style: flat bottom face = Datum B
+      // Fig i style: strictly horizontal bottom face = Datum B
       ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX - 8, tipY + 62);
-      ctx.lineTo(tipX - 46, tipY + 62);
-      ctx.bezierCurveTo(tipX - 44, tipY + 42, tipX - 34, tipY + 26, tipX - 42, tipY + 18);
+      ctx.lineTo(tipX, tipY + 60);
+      ctx.lineTo(tipX - 44, tipY + 60);
+      ctx.bezierCurveTo(tipX - 42, tipY + 40, tipX - 32, tipY + 24, tipX - 40, tipY + 18);
       ctx.lineTo(tipX, tipY);
     }
     ctx.fill();
@@ -234,20 +245,20 @@
 
     // Datum reference line + filled triangle + [A] / [B] box
     if (!isDatumB) {
-      // Extend Datum A upward-right
+      // Extend Datum A strictly vertically upward (true 90° to horizontal t_G rails)
       ctx.save();
       ctx.strokeStyle = '#181715';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
       ctx.moveTo(tipX, tipY);
-      ctx.lineTo(tipX + 4, tipY - 40);
+      ctx.lineTo(tipX, tipY - 40);
       ctx.stroke();
       ctx.restore();
 
-      // Datum [A] flag on right face
-      const dx = tipX - 3;
-      const dy = tipY + 42;
+      // Datum [A] flag on vertical right face
+      const dx = tipX;
+      const dy = tipY + 40;
       ctx.fillStyle = '#181715';
       ctx.beginPath();
       ctx.moveTo(dx, dy);
@@ -269,15 +280,15 @@
       ctx.textAlign = 'center';
       ctx.fillText('A', dx + 33, dy + 4);
     } else {
-      // Extend Datum B horizontally left/right
-      const by = tipY + 62;
+      // Extend Datum B strictly horizontally left/right
+      const by = tipY + 60;
       ctx.save();
       ctx.strokeStyle = '#181715';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
       ctx.moveTo(tipX - 66, by);
-      ctx.lineTo(tipX + 36, by);
+      ctx.lineTo(tipX + 42, by);
       ctx.stroke();
       ctx.restore();
 
@@ -294,7 +305,7 @@
       }
 
       // Datum [B] flag below bottom face
-      const bx = tipX - 24;
+      const bx = tipX - 22;
       ctx.fillStyle = '#181715';
       ctx.beginPath();
       ctx.moveTo(bx, by);
@@ -317,9 +328,19 @@
       ctx.fillText('B', bx, by + 31);
     }
 
-    // Parallel t_G dashed lines oriented per normAxisY
-    const scalePx = 560; // 0.03 mm -> ~16.8 px
-    const halfGapPx = clamp((p.toleranceMm * 0.5) * scalePx, 7, 30);
+    // Shared adaptive scale so tolerance rails t_G and projected edge locus NEVER disagree
+    const samples = res.edgeSamples || [];
+    const fitC = res.fitCtrl || { slope: 0, intercept: 0 };
+    const fitF = res.fitFree || { slope: 0, intercept: 0 };
+    let maxExcursionMm = p.toleranceMm * 0.65;
+    samples.forEach((s) => {
+      const cOff = Math.abs(s.ctrlVal - (fitC.slope * s.xMm + fitC.intercept));
+      const fOff = Math.abs(s.freeVal - (fitF.slope * s.xMm + fitF.intercept));
+      maxExcursionMm = Math.max(maxExcursionMm, cOff * 1.15, fOff * 0.72);
+    });
+    const maxRailPx = Math.min(28, Math.max(18, h * 0.16));
+    const scalePx = clamp(maxRailPx / Math.max(0.004, maxExcursionMm), 160, 1400);
+    const halfGapPx = (p.toleranceMm * 0.5) * scalePx;
 
     ctx.save();
     ctx.strokeStyle = '#d94426';
@@ -343,16 +364,16 @@
       ctx.textAlign = 'left';
       ctx.fillText('t_G', tipX + 50, tipY + 3);
 
-      // Right-angle symbol (for A) or // marks (for B)
+      // Right-angle symbol (for ⊥ A) or // marks (for // B)
       if (!isDatumB) {
         ctx.strokeStyle = '#181715';
         ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.arc(tipX + 2, y1, 9, -Math.PI / 2, 0);
+        ctx.arc(tipX, y1, 9, -Math.PI / 2, 0);
         ctx.stroke();
         ctx.fillStyle = '#181715';
         ctx.beginPath();
-        ctx.arc(tipX + 6, y1 - 4, 1.5, 0, Math.PI * 2);
+        ctx.arc(tipX + 4, y1 - 4, 1.5, 0, Math.PI * 2);
         ctx.fill();
       } else {
         for (const yy of [y1, y2]) {
@@ -372,9 +393,9 @@
       const x2 = tipX + halfGapPx;
       ctx.beginPath();
       ctx.moveTo(x1, tipY - 36);
-      ctx.lineTo(x1, tipY + 46);
+      ctx.lineTo(x1, tipY + 50);
       ctx.moveTo(x2, tipY - 36);
-      ctx.lineTo(x2, tipY + 46);
+      ctx.lineTo(x2, tipY + 50);
       ctx.stroke();
       ctx.restore();
 
@@ -383,12 +404,34 @@
       ctx.font = 'bold 10px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('t_G', tipX, tipY - 33);
+
+      // Relation marks: // for // A, right-angle arc for ⊥ B
+      if (!isDatumB) {
+        for (const xx of [x1, x2]) {
+          ctx.strokeStyle = '#d94426';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(xx - 3, tipY - 12);
+          ctx.lineTo(xx + 3, tipY - 18);
+          ctx.moveTo(xx - 3, tipY - 7);
+          ctx.lineTo(xx + 3, tipY - 13);
+          ctx.stroke();
+        }
+      } else {
+        const by = tipY + 60;
+        ctx.strokeStyle = '#181715';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(x2, by, 9, -Math.PI / 2, 0);
+        ctx.stroke();
+        ctx.fillStyle = '#181715';
+        ctx.beginPath();
+        ctx.arc(x2 + 4, by - 4, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     // End-on projected locus of the edge along u in [0, 1]
-    const samples = res.edgeSamples || [];
-    const fitC = res.fitCtrl || { slope: 0, intercept: 0 };
-    const fitF = res.fitFree || { slope: 0, intercept: 0 };
     ctx.strokeStyle = res.pass ? '#047857' : '#b91c1c';
     ctx.lineWidth = 2.0;
     ctx.beginPath();
@@ -402,10 +445,27 @@
     });
     ctx.stroke();
 
-    // Active probe dot on end-on locus
+    // Static hovered station ring (sliceFrac)
     const aIdx = Math.min(samples.length - 1, Math.max(0, Math.round(p.sliceFrac * (samples.length - 1))));
     if (samples[aIdx]) {
       const s = samples[aIdx];
+      const cOff = s.ctrlVal - (fitC.slope * s.xMm + fitC.intercept);
+      const fOff = s.freeVal - (fitF.slope * s.xMm + fitF.intercept);
+      const px = normAxisY ? tipX + fOff * scalePx : tipX + cOff * scalePx;
+      const py = normAxisY ? tipY - cOff * scalePx : tipY - fOff * scalePx;
+      ctx.strokeStyle = '#181715';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(px, py, 5.5, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // Animated live probe dot (synchronized with 3D edge probe: speed=0.25, phase=0.1)
+    if (samples.length > 0) {
+      const uEdge = ((timeSec * 0.25 + 0.1) % 1.0 + 1.0) % 1.0;
+      const pulse = 0.5 - 0.5 * Math.cos(uEdge * Math.PI * 2);
+      const pIdx = Math.min(samples.length - 1, Math.round(pulse * (samples.length - 1)));
+      const s = samples[pIdx];
       const cOff = s.ctrlVal - (fitC.slope * s.xMm + fitC.intercept);
       const fOff = s.freeVal - (fitF.slope * s.xMm + fitF.intercept);
       const px = normAxisY ? tipX + fOff * scalePx : tipX + cOff * scalePx;
@@ -468,9 +528,9 @@
     ctx.fillStyle = '#d94426';
     ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`t_G=${p.toleranceMm.toFixed(2)}`, padL + plotW - 4, Math.max(padT + 10, yTol - 4));
+    ctx.fillText(`t_G=${fmtTol(p.toleranceMm, isDe)}`, padL + plotW - 4, Math.max(padT + 10, yTol - 4));
 
-    // Secondary reference line (Flatness in f/g, or Orthogonal Unconstrained Sway in h/i)
+    // Secondary reference line (Flatness + Diagonal in f/g, or Orthogonal Unconstrained Sway in h/i)
     const yRef = toY(refSecond);
     ctx.save();
     ctx.strokeStyle = '#b45309';
@@ -483,8 +543,10 @@
     ctx.restore();
 
     const refLbl = res.mode === 'intersection'
-      ? (isDe ? `Ebenheit=${refSecond.toFixed(3)}` : `Flatness=${refSecond.toFixed(3)}`)
-      : (isDe ? `Frei=${refSecond.toFixed(3)}` : `Unconstr=${refSecond.toFixed(3)}`);
+      ? (isDe
+          ? `Ebenheit=${fmtNum(refSecond, 3, isDe)} · Diag=${fmtNum(res.diagonalError, 3, isDe)}`
+          : `Flatness=${fmtNum(refSecond, 3, isDe)} · Diag=${fmtNum(res.diagonalError, 3, isDe)}`)
+      : (isDe ? `Frei=${fmtNum(refSecond, 3, isDe)}` : `Unconstr=${fmtNum(refSecond, 3, isDe)}`);
     const lw = ctx.measureText(refLbl).width + 8;
     const ly = Math.max(padT + 10, yRef - 4);
     ctx.fillStyle = 'rgba(243, 235, 218, 0.88)';
@@ -548,8 +610,8 @@
     ctx.fillStyle = '#4b463e';
     ctx.font = '9.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
-    ctx.fillText(`${maxVal.toFixed(2)}`, padL - 5, padT + 6);
-    ctx.fillText('0.00', padL - 5, padT + plotH + 3);
+    ctx.fillText(`${fmtNum(maxVal, 2, isDe)}`, padL - 5, padT + 6);
+    ctx.fillText(isDe ? '0,00' : '0.00', padL - 5, padT + plotH + 3);
     ctx.textAlign = 'center';
     ctx.fillText('0%', padL, h - 8);
     ctx.fillText('50%', padL + plotW * 0.5, h - 8);

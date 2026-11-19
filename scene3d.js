@@ -24,6 +24,13 @@
     return v < lo ? lo : v > hi ? hi : v;
   }
 
+  function formatTolIso(val) {
+    if (typeof val === 'string') return val.replace('.', ',');
+    const n = Number(val ?? 0.05);
+    const s3 = n.toFixed(3);
+    return (s3.endsWith('0') ? n.toFixed(2) : s3).replace('.', ',');
+  }
+
   function clearGroup(group) {
     while (group.children.length > 0) {
       const child = group.children[0];
@@ -77,12 +84,12 @@
   }
 
   function makeFcfSprite(fcf) {
-    const tolStr = String(fcf.tol ?? '0,05').replace('.', ',');
+    const tolStr = formatTolIso(fcf.tol ?? '0,05');
     const isOrient = fcf.capType === 'orientation';
     return makeLabelSprite((ctx, w, h) => {
       ctx.clearRect(0, 0, w, h);
       const x0 = 6, y0 = 8, bh = h - 16;
-      const b1 = 62, b2 = 104, wedge = 20, b3 = 52, b4 = 52;
+      const b1 = 58, b2 = 110, wedge = 20, b3 = 50, b4 = 50;
       const capX = x0 + b1 + b2;
       const capBody = capX + wedge;
       const midX = capBody + b3;
@@ -102,13 +109,13 @@
       // Straightness symbol —
       ctx.lineWidth = 4.2;
       ctx.beginPath();
-      ctx.moveTo(x0 + 14, y0 + bh / 2);
-      ctx.lineTo(x0 + b1 - 14, y0 + bh / 2);
+      ctx.moveTo(x0 + 13, y0 + bh / 2);
+      ctx.lineTo(x0 + b1 - 13, y0 + bh / 2);
       ctx.stroke();
 
       // Tolerance value
       ctx.fillStyle = '#181715';
-      ctx.font = 'bold 28px "JetBrains Mono", Consolas, monospace';
+      ctx.font = `bold ${tolStr.length > 4 ? 24 : 28}px "JetBrains Mono", Consolas, monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(tolStr, x0 + b1 + b2 / 2, y0 + bh / 2 + 2);
@@ -288,6 +295,7 @@
   function buildChamferBlock(root, params, result, opts, animTargets) {
     const isWire = opts.displayMode === 'wireframe';
     const isExploded = opts.displayMode === 'exploded';
+    const isPlate2d = opts.displayMode === 'plate2d';
     const tierLift = isExploded ? 0.36 : 0.0;
     const isParallel = params.planeRelation === 'parallel';
 
@@ -336,22 +344,26 @@
     topGeo.setAttribute('position', new THREE.Float32BufferAttribute(topPos, 3));
     topGeo.setIndex(topIdx);
     topGeo.computeVertexNormals();
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: PAPER_ROAD,
-      roughness: 0.88,
-      metalness: 0.03,
-      side: THREE.DoubleSide,
-      wireframe: isWire,
-      transparent: isWire,
-      opacity: isWire ? 0.45 : 1.0,
-    });
-    const datumHighlightMat = new THREE.MeshStandardMaterial({
-      color: PAPER_SHADE,
-      roughness: 0.9,
-      metalness: 0.02,
-      side: THREE.DoubleSide,
-      wireframe: isWire,
-    });
+    const bodyMat = isPlate2d
+      ? new THREE.MeshBasicMaterial({ color: PAPER_ROAD, side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({
+          color: PAPER_ROAD,
+          roughness: 0.88,
+          metalness: 0.03,
+          side: THREE.DoubleSide,
+          wireframe: isWire,
+          transparent: isWire,
+          opacity: isWire ? 0.45 : 1.0,
+        });
+    const datumHighlightMat = isPlate2d
+      ? new THREE.MeshBasicMaterial({ color: PAPER_SHADE, side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({
+          color: PAPER_SHADE,
+          roughness: 0.9,
+          metalness: 0.02,
+          side: THREE.DoubleSide,
+          wireframe: isWire,
+        });
     root.add(new THREE.Mesh(topGeo, bodyMat));
 
     // 2. Chamfer Slope Face (xShoulder..xRight, smoothly matching top edge at u=1)
@@ -477,7 +489,7 @@
     // 7. Leader Dot & ISO 1101 Feature Control Frame
     const fcfSpec = {
       sym: 'straightness',
-      tol: params.toleranceMm.toFixed(2).replace('.', ','),
+      tol: formatTolIso(params.toleranceMm),
       capType: 'intersection',
       rel: params.planeRelation,
       datum: params.datum || 'A',
@@ -534,16 +546,17 @@
       const lowerPts = [];
       const upperPts = [];
       const actualPts = [];
+      const zoneEps = 0.006;
       for (let k = 0; k <= 32; k++) {
         const t = k / 32;
         const u = isParallel ? t : fAct;
         const v = isParallel ? fAct : t;
         const x = xLeft + u * (xShoulder - xLeft);
         const z = zMin + v * (zMax - zMin);
-        const midY = yTopNom + (fit.slope * (t * spanMm) + fit.intercept) * visScale + tierLift;
+        const midY = yTopNom + (fit.slope * (t * spanMm) + fit.intercept) * visScale + zoneEps + tierLift;
         lowerPts.push(new THREE.Vector3(x, midY - halfZone, z));
         upperPts.push(new THREE.Vector3(x, midY + halfZone, z));
-        actualPts.push(new THREE.Vector3(x, devY(u, v) + 0.012 + tierLift, z));
+        actualPts.push(new THREE.Vector3(x, devY(u, v) + zoneEps + tierLift, z));
       }
 
       const zoneColor = result.pass ? OK_GREEN : FAIL_RED;
@@ -626,6 +639,7 @@
   function buildWedgeBlade(root, params, result, opts, animTargets) {
     const isWire = opts.displayMode === 'wireframe';
     const isExploded = opts.displayMode === 'exploded';
+    const isPlate2d = opts.displayMode === 'plate2d';
     const tierLift = isExploded ? 0.34 : 0.0;
     const isDatumB = params.datum === 'B';
 
@@ -660,22 +674,26 @@
       backBotPts.push(new THREE.Vector3(x, yBase, shortZ));
     }
 
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: PAPER_ROAD,
-      roughness: 0.88,
-      metalness: 0.03,
-      side: THREE.DoubleSide,
-      wireframe: isWire,
-      transparent: isWire,
-      opacity: isWire ? 0.45 : 1.0,
-    });
-    const datumMat = new THREE.MeshStandardMaterial({
-      color: PAPER_SHADE,
-      roughness: 0.9,
-      metalness: 0.02,
-      side: THREE.DoubleSide,
-      wireframe: isWire,
-    });
+    const bodyMat = isPlate2d
+      ? new THREE.MeshBasicMaterial({ color: PAPER_ROAD, side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({
+          color: PAPER_ROAD,
+          roughness: 0.88,
+          metalness: 0.03,
+          side: THREE.DoubleSide,
+          wireframe: isWire,
+          transparent: isWire,
+          opacity: isWire ? 0.45 : 1.0,
+        });
+    const datumMat = isPlate2d
+      ? new THREE.MeshBasicMaterial({ color: PAPER_SHADE, side: THREE.DoubleSide })
+      : new THREE.MeshStandardMaterial({
+          color: PAPER_SHADE,
+          roughness: 0.9,
+          metalness: 0.02,
+          side: THREE.DoubleSide,
+          wireframe: isWire,
+        });
 
     function buildStripFace(rowA, rowB, mat) {
       const pos = [];
@@ -740,7 +758,7 @@
     // Arrowhead Leader & FCF on Ridge Edge
     const fcfSpec = {
       sym: 'straightness',
-      tol: params.toleranceMm.toFixed(2).replace('.', ','),
+      tol: formatTolIso(params.toleranceMm),
       capType: 'orientation',
       rel: params.planeRelation,
       datum: params.datum || 'A',
@@ -763,19 +781,20 @@
       const spanMm = 120;
 
       // Build two parallel planes spaced by t_G around best-fit centerline
+      const zoneEps = 0.006;
       for (const sign of [-1, 1]) {
         const corners = [];
         [0, 1].forEach((u) => {
           const x = xMin + u * (xMax - xMin);
           const ctrVal = (fit.slope * (u * spanMm) + fit.intercept) * visScale;
           if (normAxisY) {
-            const yVal = yRidgeNom + ctrVal + sign * halfZone + tierLift;
+            const yVal = yRidgeNom + ctrVal + sign * halfZone + zoneEps + tierLift;
             corners.push(new THREE.Vector3(x, yVal, ridgeZNom - spanW));
             corners.push(new THREE.Vector3(x, yVal, ridgeZNom + spanW));
           } else {
             const zVal = ridgeZNom + ctrVal + sign * halfZone;
-            corners.push(new THREE.Vector3(x, yRidgeNom - spanW * 0.7 + tierLift, zVal));
-            corners.push(new THREE.Vector3(x, yRidgeNom + spanW * 0.7 + tierLift, zVal));
+            corners.push(new THREE.Vector3(x, yRidgeNom - spanW * 0.7 + zoneEps + tierLift, zVal));
+            corners.push(new THREE.Vector3(x, yRidgeNom + spanW * 0.7 + zoneEps + tierLift, zVal));
           }
         });
         // Reorder corners for quad: (u0, -w), (u1, -w), (u1, +w), (u0, +w)
@@ -791,7 +810,7 @@
       }
 
       // Highlight the deformed ridge line in green (pass) or vermilion/crimson (fail)
-      const liftedRidge = ridgePts.map((pt) => new THREE.Vector3(pt.x, pt.y + tierLift + 0.008, pt.z));
+      const liftedRidge = ridgePts.map((pt) => new THREE.Vector3(pt.x, pt.y + tierLift + zoneEps, pt.z));
       addLine(root, liftedRidge, result.pass ? OK_GREEN : FAIL_RED);
 
       // Mark excursion peaks if failing
@@ -930,8 +949,15 @@
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(PAPER_BG);
 
-      this.camera = new THREE.PerspectiveCamera(38, (container.clientWidth || 800) / (container.clientHeight || 500), 0.1, 100);
-      this.camera.position.set(0.0, 7.1, 6.9);
+      const initW = container.clientWidth || 800;
+      const initH = container.clientHeight || 500;
+      const aspect = initW / initH;
+      this.perspCamera = new THREE.PerspectiveCamera(38, aspect, 0.1, 100);
+      this.perspCamera.position.set(0.0, 7.1, 6.9);
+      this.orthoCamera = new THREE.OrthographicCamera(-2.4 * aspect, 2.4 * aspect, 2.4, -2.4, -30, 100);
+      this.orthoCamera.position.copy(this.perspCamera.position);
+      this.camera = this.perspCamera;
+      this.lastPartFamily = 'chamfer_block';
 
       this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
       this.controls.enableDamping = true;
@@ -965,19 +991,48 @@
       window.addEventListener('resize', this._resizeHandler);
     }
 
+    syncCameraProjection() {
+      const wantOrtho = this.displayMode === 'plate2d';
+      const targetCam = wantOrtho ? this.orthoCamera : this.perspCamera;
+      if (this.camera !== targetCam) {
+        targetCam.position.copy(this.camera.position);
+        targetCam.quaternion.copy(this.camera.quaternion);
+        this.camera = targetCam;
+        this.controls.object = this.camera;
+      }
+      this.updateCameraFrustum();
+    }
+
+    updateCameraFrustum() {
+      const w = Math.max(10, this.container.clientWidth);
+      const h = Math.max(10, this.container.clientHeight);
+      const aspect = w / h;
+      this.perspCamera.aspect = aspect;
+      this.perspCamera.updateProjectionMatrix();
+
+      const dist = Math.max(1.5, this.camera.position.distanceTo(this.controls.target));
+      const halfH = Math.tan(THREE.MathUtils.degToRad(38 * 0.5)) * dist;
+      this.orthoCamera.left = -halfH * aspect;
+      this.orthoCamera.right = halfH * aspect;
+      this.orthoCamera.top = halfH;
+      this.orthoCamera.bottom = -halfH;
+      this.orthoCamera.updateProjectionMatrix();
+    }
+
     resize() {
       const w = Math.max(10, this.container.clientWidth);
       const h = Math.max(10, this.container.clientHeight);
-      this.camera.aspect = w / h;
-      this.camera.updateProjectionMatrix();
+      this.updateCameraFrustum();
       this.renderer.setSize(w, h);
     }
 
     showOverview(figures, overviewIds, variantMode) {
+      this.syncCameraProjection();
       clearGroup(this.worldGroup);
       this.animTargets = [];
       this.pickables = [];
       this.overviewAnchors.clear();
+      this.lastPartFamily = 'overview';
 
       // 2 x 2 Museum Plate Gallery Floor
       const dx = 3.55;
@@ -1013,6 +1068,7 @@
     }
 
     showSingle(figId, params) {
+      this.syncCameraProjection();
       clearGroup(this.worldGroup);
       this.animTargets = [];
       this.pickables = [];
@@ -1025,6 +1081,7 @@
         this.animTargets
       );
       this.lastStats = stats;
+      this.lastPartFamily = stats.partFamily;
       this.worldGroup.add(root);
     }
 
@@ -1083,19 +1140,25 @@
       }
 
       this.controls.update();
+      if (this.camera === this.orthoCamera) {
+        this.updateCameraFrustum();
+      }
       this.renderer.render(this.scene, this.camera);
 
       if (this.onCalloutProject && this.activeCallouts.length > 0) {
         const w = this.container.clientWidth || 800;
         const h = this.container.clientHeight || 500;
         const tmpV = new THREE.Vector3();
-        const lift = this.displayMode === 'exploded' ? 0.28 : 0.0;
+        const tierLift = this.displayMode === 'exploded'
+          ? (this.lastPartFamily === 'wedge_blade' ? 0.34 : 0.36)
+          : 0.0;
 
         const projected = this.activeCallouts.map((c) => {
           const ov = this.overviewAnchors.get(c.id);
           if (ov) {
             tmpV.set(ov[0], ov[1], ov[2]);
           } else {
+            const lift = tierLift * (c.explodeFactor ?? 0);
             tmpV.set(c.anchor[0], c.anchor[1] + lift, c.anchor[2]);
           }
           tmpV.project(this.camera);

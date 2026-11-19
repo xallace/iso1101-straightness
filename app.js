@@ -30,6 +30,7 @@
 
     // Lab
     activePresetId: 'fig_f',
+    lastPresetId: 'fig_f',
     labParams: { ...D.LAB_PRESETS.fig_f.params },
     labResult: null,
     simClock: 0,
@@ -45,8 +46,21 @@
     return D.UI_TEXT[state.lang] || D.UI_TEXT.en;
   }
 
+  function figCode(fig) {
+    return state.lang === 'de' ? (fig.codeDe || fig.code) : fig.code;
+  }
+
+  function figPlate(fig) {
+    return state.lang === 'de' ? (fig.plateDe || fig.plate) : fig.plate;
+  }
+
+  function fmtNum(val, decimals) {
+    return D.formatNum(val, decimals, state.lang);
+  }
+
   function applyStaticTranslations() {
     const txt = t();
+    document.documentElement.lang = state.lang;
     $('#ui-brand-title').textContent = txt.brandTitle;
     $('#ui-brand-sub').textContent = txt.brandSub;
     $('#ui-source-ref').textContent = txt.sourceRef;
@@ -56,7 +70,12 @@
     $('#tab-btn-reading').textContent = txt.tabReading;
     $('#ui-btn-tour').textContent = txt.btnTour;
     $('#play-label').textContent = txt.btnPlay;
+    $('#btn-play-pause').title = txt.titlePlayPause;
     $('#btn-overview').textContent = txt.btnOverview;
+    $('#btn-prev-fig').title = txt.titlePrevFig;
+    $('#btn-next-fig').title = txt.titleNextFig;
+    $('#select-figure').title = txt.titleSelectFig;
+    $('#select-display-mode').title = txt.titleDisplayMode;
     $('#btn-vstate-nom').textContent = txt.stateNominal;
     $('#btn-vstate-err').textContent = txt.stateError;
     $('#opt-solid').textContent = txt.modeSolid;
@@ -90,6 +109,8 @@
     $('#btn-rel-par').textContent = txt.relParallel;
     $('#btn-rel-perp').textContent = txt.relPerp;
     $('#ui-lbl-dat').textContent = txt.labelDatum;
+    $('#btn-dat-a').textContent = txt.datA;
+    $('#btn-dat-b').textContent = txt.datB;
     $('#ui-grp-def').textContent = txt.groupDeform;
 
     $('#ui-concepts-kicker').textContent = txt.conceptsKicker;
@@ -209,7 +230,7 @@
         btn.className = 'callout-pin overview-pin';
         const capTag = fig.fcf.capType === 'intersection' ? '⟨' : '⟨⟩';
         const relSym = fig.fcf.rel === 'parallel' ? '//' : '⊥';
-        btn.innerHTML = `<span class="pin-num">${fig.code}</span> ${relSym} ${fig.fcf.datum} ${capTag}`;
+        btn.innerHTML = `<span class="pin-num">${figCode(fig)}</span> ${relSym} ${fig.fcf.datum} ${capTag}`;
         btn.addEventListener('click', () => selectAtlasFigure(fid));
         layer.appendChild(btn);
         calloutDomMap.set(fid, { btn, line: null, dot: null, offsetY: 0 });
@@ -288,17 +309,23 @@
   // --------------------------------------------------------------------------
   function populateFigureDropdown() {
     const sel = $('#select-figure');
-    const current = sel.value || state.atlasFigure;
+    const txt = t();
     sel.innerHTML = '';
+
+    const ovOpt = document.createElement('option');
+    ovOpt.value = 'overview';
+    ovOpt.textContent = txt.overviewOpt;
+    sel.appendChild(ovOpt);
+
     D.FIGURE_ORDER.forEach((fid) => {
       const fig = D.FIGURES[fid];
       const loc = fig[state.lang] || fig.en;
       const opt = document.createElement('option');
       opt.value = fid;
-      opt.textContent = `${fig.code} — ${loc.name}`;
+      opt.textContent = `${figCode(fig)} — ${loc.name}`;
       sel.appendChild(opt);
     });
-    if (D.FIGURES[current]) sel.value = current;
+    sel.value = (state.atlasFigure === 'overview' || D.FIGURES[state.atlasFigure]) ? state.atlasFigure : 'overview';
   }
 
   function selectAtlasFigure(fid) {
@@ -307,7 +334,7 @@
 
     const isOverview = fid === 'overview';
     $('#btn-overview').classList.toggle('active', isOverview);
-    if (!isOverview) $('#select-figure').value = fid;
+    $('#select-figure').value = (isOverview || D.FIGURES[fid]) ? fid : 'overview';
 
     refresh3DScene(true);
   }
@@ -337,8 +364,8 @@
         item.className = 'callout-item';
         item.innerHTML = `
           <div class="callout-item-head">
-            <span>${f.code} · ${loc.name}</span>
-            <span class="callout-badge">${f.plate}</span>
+            <span>${figCode(f)} · ${loc.name}</span>
+            <span class="callout-badge">${figPlate(f)}</span>
           </div>
           <div class="callout-item-body">${loc.subtitle}</div>
         `;
@@ -362,7 +389,7 @@
     const params = state.variantState === 'nominal' ? fig.nominalParams : fig.errorParams;
     const res = P.solveTolerance(params);
 
-    $('#atlas-code').textContent = `${fig.code} · ${fig.plate.toUpperCase()}`;
+    $('#atlas-code').textContent = `${figCode(fig)} · ${fig.relTag}`;
     $('#atlas-title').textContent = loc.name;
     $('#atlas-cat-tag').textContent = loc.category;
     $('#atlas-summary').textContent = loc.summary;
@@ -372,7 +399,7 @@
     fcfWrap.innerHTML = `
       <div class="fcf-specimen-card">
         <div class="fcf-specimen-meta">
-          <strong>${fig.plate}</strong>
+          <strong>${figPlate(fig)}</strong>
           <span>${fig.fcf.terminator === 'dot' ? (state.lang === 'de' ? '• Flächenbezug' : '• Surface Target') : (state.lang === 'de' ? '▼ Kantenbezug' : '▼ Edge Target')}</span>
         </div>
         ${D.renderFcfSvg(fig.fcf)}
@@ -395,12 +422,12 @@
     const cards = [
       {
         lbl: txt.kpiStraight,
-        val: `${res.controlledError.toFixed(3)} mm`,
+        val: `${fmtNum(res.controlledError, 3)} mm`,
         cls: res.pass ? 'good' : 'warn',
       },
       {
         lbl: res.mode === 'intersection' ? txt.kpiFlatness : txt.kpiOrtho,
-        val: `${(res.mode === 'intersection' ? res.flatnessError : res.orthogonalError).toFixed(3)} mm`,
+        val: `${fmtNum(res.mode === 'intersection' ? res.flatnessError : res.orthogonalError, 3)} mm`,
         cls: 'accent',
       },
       {
@@ -418,6 +445,9 @@
   // Guided Tour
   // --------------------------------------------------------------------------
   function startTour(idx = 0) {
+    if (state.activeTab !== 'atlas') {
+      setActiveTab('atlas');
+    }
     state.tourActive = true;
     $('#tour-card').classList.remove('hidden');
     goToTourStop(idx);
@@ -498,7 +528,7 @@
       ? [
           { key: 'bowLong', label: isDe ? 'Längswölbung (// A)' : 'Longitudinal Bow (// A)', min: -0.08, max: 0.08, step: 0.002, unit: ' mm', decimals: 3 },
           { key: 'bowTrans', label: isDe ? 'Querwölbung (⊥ A)' : 'Transverse Cupping (⊥ A)', min: -0.08, max: 0.08, step: 0.002, unit: ' mm', decimals: 3 },
-          { key: 'twist', label: isDe ? 'Flächenverwindung (Twist)' : 'Ruled Surface Twist', min: -0.08, max: 0.08, step: 0.002, unit: ' mm', decimals: 3 },
+          { key: 'twist', label: isDe ? 'Flächenverwindung (Twist)' : 'Ruled Surface Twist', min: -0.10, max: 0.10, step: 0.002, unit: ' mm', decimals: 3 },
           { key: 'harmonics', label: isDe ? 'Wellenordnung (Lobes)' : 'Wave Harmonics', min: 1, max: 4, step: 1, unit: '', decimals: 0 },
         ]
       : [
@@ -514,7 +544,7 @@
     wrap.innerHTML = '';
     specs.forEach((s) => {
       const val = state.labParams[s.key] ?? 0;
-      const disp = s.pct ? `${Math.round(val * 100)}${s.unit}` : `${Number(val).toFixed(s.decimals)}${s.unit}`;
+      const disp = s.pct ? `${Math.round(val * 100)}${s.unit}` : `${fmtNum(val, s.decimals)}${s.unit}`;
       const row = document.createElement('div');
       row.className = 'slider-row';
       row.innerHTML = `
@@ -530,7 +560,7 @@
         const v = state.labParams[s.key];
         row.querySelector('.slider-val').textContent = s.pct
           ? `${Math.round(v * 100)}${s.unit}`
-          : `${Number(v).toFixed(s.decimals)}${s.unit}`;
+          : `${fmtNum(v, s.decimals)}${s.unit}`;
         state.activePresetId = null;
         syncPresetButtons();
         onLabParameterChange();
@@ -562,6 +592,7 @@
     const pr = D.LAB_PRESETS[pid];
     if (!pr) return;
     state.activePresetId = pid;
+    state.lastPresetId = pid;
     state.labParams = {
       bowLong: 0,
       bowTrans: 0,
@@ -618,18 +649,18 @@
 
     // Top Lab Status Badges
     const statusPill = $('#badge-status');
-    statusPill.textContent = `${res.pass ? txt.passWord : txt.failWord} · ${res.controlledError.toFixed(3)} / ${p.toleranceMm.toFixed(3)} mm`;
+    statusPill.textContent = `${res.pass ? txt.passWord : txt.failWord} · ${fmtNum(res.controlledError, 3)} / ${fmtNum(p.toleranceMm, 3)} mm`;
     statusPill.className = 'status-pill ' + (res.pass ? 'good' : 'warn');
 
     $('#badge-flatness').textContent = isInter
-      ? `${state.lang === 'de' ? 'Ebenheit' : 'Flatness'} ${res.flatnessError.toFixed(3)} mm`
-      : `${state.lang === 'de' ? 'Freie Dir.' : 'Unconstr.'} ${res.orthogonalError.toFixed(3)} mm`;
-    $('#badge-dof').textContent = res.dofNote;
+      ? `${state.lang === 'de' ? 'Ebenheit' : 'Flatness'} ${fmtNum(res.flatnessError, 3)} mm`
+      : `${state.lang === 'de' ? 'Freie Dir.' : 'Unconstr.'} ${fmtNum(res.orthogonalError, 3)} mm`;
+    $('#badge-dof').textContent = state.lang === 'de' ? (res.dofNoteDe || res.dofNote) : (res.dofNoteEn || res.dofNote);
 
     // Live FCF preview card
     const fcfSpec = {
       sym: 'straightness',
-      tol: p.toleranceMm.toFixed(2).replace('.', ','),
+      tol: D.formatTol(p.toleranceMm, true),
       capType: p.indicatorType,
       rel: p.planeRelation,
       datum: isInter ? 'A' : (p.datum || 'A'),
@@ -645,9 +676,9 @@
       </div>`;
 
     const kpis = [
-      { lbl: txt.kpiStraight, val: `${res.controlledError.toFixed(3)} mm`, cls: res.pass ? 'good' : 'warn' },
-      { lbl: isInter ? txt.kpiFlatness : txt.kpiOrtho, val: `${(isInter ? res.flatnessError : res.orthogonalError).toFixed(3)} mm`, cls: 'accent' },
-      { lbl: txt.kpiSlice, val: `${res.activeSliceError.toFixed(3)} mm`, cls: res.activeSliceError <= p.toleranceMm + 1e-9 ? 'good' : 'warn' },
+      { lbl: txt.kpiStraight, val: `${fmtNum(res.controlledError, 3)} mm`, cls: res.pass ? 'good' : 'warn' },
+      { lbl: isInter ? txt.kpiFlatness : txt.kpiOrtho, val: `${fmtNum(isInter ? res.flatnessError : res.orthogonalError, 3)} mm`, cls: 'accent' },
+      { lbl: isInter ? txt.kpiSlice : txt.kpiSliceEdge, val: `${fmtNum(res.activeSliceError, 3)} mm`, cls: res.activeSliceError <= p.toleranceMm + 1e-9 ? 'good' : 'warn' },
     ];
     $('#lab-kpis').innerHTML = kpis
       .map((k) => `<div class="kpi-card"><div class="kpi-label">${k.lbl}</div><div class="kpi-val ${k.cls}">${k.val}</div></div>`)
@@ -797,7 +828,7 @@
     $('#btn-tour-next').addEventListener('click', () => {
       if (state.tourIndex === D.TOUR_STOPS.length - 1) {
         stopTour();
-        loadLabPreset('fig_f');
+        loadLabPreset('twist_paradox');
         setActiveTab('lab');
       } else {
         goToTourStop(state.tourIndex + 1);
@@ -814,6 +845,19 @@
     $('#select-display-mode').addEventListener('change', (e) => {
       state.displayMode = e.target.value;
       refresh3DScene(false);
+      if (state.displayMode === 'plate2d') {
+        const isOverview = state.activeTab === 'atlas' && state.atlasFigure === 'overview';
+        const isOrient = state.activeTab === 'lab'
+          ? state.labParams.indicatorType === 'orientation'
+          : (!isOverview && D.FIGURES[state.atlasFigure]?.fcf?.capType === 'orientation');
+        if (isOverview) {
+          sceneMgr.flyTo([0.0, 9.2, 0.25], [0.0, 0.05, 0.0], 550);
+        } else if (isOrient) {
+          sceneMgr.flyTo([3.1, 0.52, 0.15], [0.0, 0.34, 0.0], 550);
+        } else {
+          sceneMgr.flyTo([0.0, 3.6, 0.15], [0.0, 0.2, 0.0], 550);
+        }
+      }
     });
 
     $('#btn-toggle-callouts').addEventListener('click', (e) => {
@@ -867,7 +911,7 @@
     });
 
     $('#btn-reset-lab').addEventListener('click', () => {
-      loadLabPreset(state.activePresetId || 'fig_f');
+      loadLabPreset(state.lastPresetId || 'fig_f');
     });
 
     $$('#ind-type-group .mini-btn').forEach((btn) => {

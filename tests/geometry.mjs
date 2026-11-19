@@ -24,7 +24,7 @@ const TOL = 0.02;
 for (const key of D.FIGURE_ORDER) {
   const fig = D.FIGURES[key];
   for (const variant of ['nominal', 'error']) {
-    for (const mode of ['solid3d', 'exploded', 'wireframe']) {
+    for (const mode of ['solid3d', 'exploded', 'plate2d', 'wireframe']) {
       const params = variant === 'nominal' ? fig.nominalParams : fig.errorParams;
       const anim = [];
       const { root, stats } = S.buildFigureGeometry(

@@ -311,6 +311,8 @@
         pass,
         utilizationPct,
         dofNote: isParallel ? 'Transverse bow & twist unconstrained' : 'Longitudinal bow & twist unconstrained',
+        dofNoteEn: isParallel ? 'Transverse bow & twist unconstrained' : 'Longitudinal bow & twist unconstrained',
+        dofNoteDe: isParallel ? 'Querwölbung & Verwindung frei' : 'Längswölbung & Verwindung frei',
       };
     }
 
@@ -342,11 +344,12 @@
     const fitCtrl = solveMinZoneStraightness1D(ptsControlled);
     const fitFree = solveMinZoneStraightness1D(ptsFree);
     const total3DExcursion = Math.hypot(fitCtrl.error, fitFree.error);
+    const slopeNorm = Math.sqrt(1 + fitCtrl.slope * fitCtrl.slope);
 
-    // Compute per-station residual from minimum-zone midplane for plotting
+    // Compute per-station perpendicular residual from minimum-zone midplane for plotting
     const stations = edgeSamples.map((s) => {
       const midY = fitCtrl.slope * s.xMm + fitCtrl.intercept;
-      const residual = s.ctrlVal - midY;
+      const residual = (s.ctrlVal - midY) / slopeNorm;
       const outOfTol = Math.abs(residual) > p.toleranceMm * 0.5 + 1e-9;
       return {
         sFrac: s.u,
@@ -382,6 +385,12 @@
       dofNote: normAxisIsY
         ? 'Lateral Z-waviness stays between parallel planes'
         : 'Vertical Y-waviness stays between parallel planes',
+      dofNoteEn: normAxisIsY
+        ? 'Lateral Z-waviness stays between parallel planes'
+        : 'Vertical Y-waviness stays between parallel planes',
+      dofNoteDe: normAxisIsY
+        ? 'Seitenschlag (Z) bleibt zwischen parallelen Ebenen'
+        : 'Höhenwelligkeit (Y) bleibt zwischen parallelen Ebenen',
     };
   }
 
