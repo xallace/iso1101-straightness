@@ -9,16 +9,16 @@
   const THREE = global.THREE;
   const P = global.ISO_PHYSICS;
 
-  const INK_DARK = 0x181715;
-  const INK_CHARCOAL = 0x2b2823;
-  const PAPER_BG = 0xefe6d3;
-  const PAPER_CARD = 0xf6efe0;
-  const PAPER_ROAD = 0xfaf5e8;
-  const PAPER_SHADE = 0xe4d9c3;
-  const VERMILION = 0xd94426;
-  const AMBER_WARM = 0xb45309;
-  const OK_GREEN = 0x047857;
-  const FAIL_RED = 0xb91c1c;
+  const INK_DARK = 0xe9edf5;
+  const INK_CHARCOAL = 0xd2d8e2;
+  const PAPER_BG = 0x101620;
+  const PAPER_CARD = 0x151c28;
+  const PAPER_ROAD = 0x222b3c;
+  const PAPER_SHADE = 0x1a2130;
+  const VERMILION = 0xff7d61;
+  const AMBER_WARM = 0xed864b;
+  const OK_GREEN = 0x58b691;
+  const FAIL_RED = 0xff695d;
 
   function clamp(v, lo, hi) {
     return v < lo ? lo : v > hi ? hi : v;
@@ -60,7 +60,7 @@
     const ctx = canvas.getContext('2d');
     drawFn(ctx, cw, ch);
     const tex = new THREE.CanvasTexture(canvas);
-    if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+    // dark theme: colours are output as authored (no sRGB re-encoding)
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
     const spr = new THREE.Sprite(mat);
     spr.scale.set(worldW, worldH, 1);
@@ -70,12 +70,12 @@
 
   function makeDatumSprite(letter) {
     return makeLabelSprite((ctx, w, h) => {
-      ctx.fillStyle = '#faf5e8';
-      ctx.strokeStyle = '#181715';
+      ctx.fillStyle = '#0a101a';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 4;
       ctx.fillRect(6, 6, w - 12, h - 12);
       ctx.strokeRect(6, 6, w - 12, h - 12);
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.font = 'bold 42px "JetBrains Mono", Consolas, monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
@@ -96,8 +96,8 @@
       const endX = midX + b4;
 
       // Tolerance box
-      ctx.fillStyle = '#faf5e8';
-      ctx.strokeStyle = '#181715';
+      ctx.fillStyle = '#0a101a';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 3.5;
       ctx.fillRect(x0, y0, b1 + b2, bh);
       ctx.strokeRect(x0, y0, b1 + b2, bh);
@@ -114,15 +114,15 @@
       ctx.stroke();
 
       // Tolerance value
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.font = `bold ${tolStr.length > 4 ? 24 : 28}px "JetBrains Mono", Consolas, monospace`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(tolStr, x0 + b1 + b2 / 2, y0 + bh / 2 + 2);
 
       // Plane indicator cap
-      ctx.fillStyle = '#f6efe0';
-      ctx.strokeStyle = '#d94426';
+      ctx.fillStyle = '#0d121c';
+      ctx.strokeStyle = '#ff7d61';
       ctx.lineWidth = 3.5;
       ctx.beginPath();
       ctx.moveTo(capX, y0 + bh / 2);
@@ -148,7 +148,7 @@
       ctx.stroke();
 
       // // or perp
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 3.5;
       if (fcf.rel === 'parallel') {
         ctx.beginPath();
@@ -167,14 +167,14 @@
       }
 
       // Datum letter
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.fillText(fcf.datum || 'A', midX + b4 / 2, y0 + bh / 2 + 2);
     }, 320, 76, 1.05, 0.25);
   }
 
-  function makeTextTagSprite(text, colorHex = '#d94426') {
+  function makeTextTagSprite(text, colorHex = '#ff7d61') {
     return makeLabelSprite((ctx, w, h) => {
-      ctx.fillStyle = 'rgba(250, 245, 232, 0.92)';
+      ctx.fillStyle = 'rgba(10, 16, 26, 0.92)';
       ctx.strokeStyle = colorHex;
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -829,7 +829,7 @@
 
       // Right-angle or Parallel symbol tag next to zone planes
       const tagText = normAxisY ? (isDatumB ? '// B · t_G' : '⊥ A · t_G') : (isDatumB ? '⊥ B · t_G' : '// A · t_G');
-      const spr = makeTextTagSprite(tagText, result.pass ? '#047857' : '#d94426');
+      const spr = makeTextTagSprite(tagText, result.pass ? '#58b691' : '#ff7d61');
       if (spr) {
         spr.position.set(xMax + 0.25, yRidgeNom + tierLift, ridgeZNom);
         groupAddSafe(root, spr);
@@ -902,7 +902,7 @@
     root.add(baseEdges);
 
     // Subtle survey grid lines on top of the parchment plate
-    const gridColor = 0x181715;
+    const gridColor = 0xe9edf5;
     for (let gx = -1.2; gx <= 1.21; gx += 0.4) {
       addLine(root, [new THREE.Vector3(gx, 0.002, -plateD * 0.48), new THREE.Vector3(gx, 0.002, plateD * 0.48)], gridColor, { opacity: 0.08 });
     }
@@ -943,7 +943,7 @@
       this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       this.renderer.setSize(container.clientWidth || 800, container.clientHeight || 500);
-      if (THREE.sRGBEncoding) this.renderer.outputEncoding = THREE.sRGBEncoding;
+      // dark theme: no sRGB output encoding, material hex values render as authored
       container.appendChild(this.renderer.domElement);
 
       this.scene = new THREE.Scene();
@@ -966,10 +966,10 @@
       this.controls.maxDistance = 18;
       this.controls.maxPolarAngle = Math.PI * 0.49;
 
-      this.ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-      this.dirLight = new THREE.DirectionalLight(0xfffaf0, 0.55);
+      this.ambientLight = new THREE.AmbientLight(0xffffff, 0.62);
+      this.dirLight = new THREE.DirectionalLight(0xfffaf0, 0.42);
       this.dirLight.position.set(4, 9, 6);
-      this.fillLight = new THREE.DirectionalLight(0xefe6d3, 0.25);
+      this.fillLight = new THREE.DirectionalLight(0xefe6d3, 0.2);
       this.fillLight.position.set(-5, 3, -4);
       this.scene.add(this.ambientLight, this.dirLight, this.fillLight);
 

@@ -986,8 +986,8 @@
       ? formatTol(fcf.tol, true)
       : String(fcf.tol ?? '0,05').replace('.', ',');
     const relSym = fcf.rel === 'parallel'
-      ? `<line x1="${capBodyStart + 8}" y1="${y0 + 25}" x2="${capBodyStart + 15}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/><line x1="${capBodyStart + 15}" y1="${y0 + 25}" x2="${capBodyStart + 22}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/>`
-      : `<line x1="${capBodyStart + 6}" y1="${y0 + 24}" x2="${capBodyStart + 22}" y2="${y0 + 24}" stroke="#181715" stroke-width="2"/><line x1="${capBodyStart + 14}" y1="${y0 + 24}" x2="${capBodyStart + 14}" y2="${y0 + 9}" stroke="#181715" stroke-width="2"/>`;
+      ? `<line x1="${capBodyStart + 8}" y1="${y0 + 25}" x2="${capBodyStart + 15}" y2="${y0 + 9}" stroke="#e9edf5" stroke-width="2"/><line x1="${capBodyStart + 15}" y1="${y0 + 25}" x2="${capBodyStart + 22}" y2="${y0 + 9}" stroke="#e9edf5" stroke-width="2"/>`
+      : `<line x1="${capBodyStart + 6}" y1="${y0 + 24}" x2="${capBodyStart + 22}" y2="${y0 + 24}" stroke="#e9edf5" stroke-width="2"/><line x1="${capBodyStart + 14}" y1="${y0 + 24}" x2="${capBodyStart + 14}" y2="${y0 + 9}" stroke="#e9edf5" stroke-width="2"/>`;
 
     const capPoly = rightPoint
       ? `${capX},${y0 + h / 2} ${capBodyStart},${y0} ${capEnd},${y0} ${capEnd + wedge},${y0 + h / 2} ${capEnd},${y0 + h} ${capBodyStart},${y0 + h}`
@@ -996,15 +996,15 @@
     const cls = compact ? 'fcf-svg compact' : 'fcf-svg';
     return `
       <svg class="${cls}" viewBox="0 0 ${totalW} ${h + 4}" width="${compact ? Math.round(totalW * 0.85) : totalW}" height="${compact ? Math.round((h + 4) * 0.85) : h + 4}" aria-label="ISO 1101 Feature Control Frame">
-        <rect x="${x0}" y="${y0}" width="${box1W + box2W}" height="${h}" fill="#faf5e8" stroke="#181715" stroke-width="1.8"/>
-        <line x1="${x0 + box1W}" y1="${y0}" x2="${x0 + box1W}" y2="${y0 + h}" stroke="#181715" stroke-width="1.6"/>
-        <line x1="${x0 + 8}" y1="${y0 + h / 2}" x2="${x0 + box1W - 8}" y2="${y0 + h / 2}" stroke="#181715" stroke-width="2.2"/>
-        <text x="${x0 + box1W + box2W / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13.5" font-weight="700" fill="#181715">${tolText}</text>
-        <polygon points="${capPoly}" fill="#f6efe0" stroke="#d94426" stroke-width="1.8" stroke-linejoin="round"/>
-        <line x1="${capBodyStart}" y1="${y0}" x2="${capBodyStart}" y2="${y0 + h}" stroke="#d94426" stroke-width="1.3"/>
-        <line x1="${capMidX}" y1="${y0}" x2="${capMidX}" y2="${y0 + h}" stroke="#d94426" stroke-width="1.3"/>
+        <rect x="${x0}" y="${y0}" width="${box1W + box2W}" height="${h}" fill="#0a101a" stroke="#e9edf5" stroke-width="1.8"/>
+        <line x1="${x0 + box1W}" y1="${y0}" x2="${x0 + box1W}" y2="${y0 + h}" stroke="#e9edf5" stroke-width="1.6"/>
+        <line x1="${x0 + 8}" y1="${y0 + h / 2}" x2="${x0 + box1W - 8}" y2="${y0 + h / 2}" stroke="#e9edf5" stroke-width="2.2"/>
+        <text x="${x0 + box1W + box2W / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="13.5" font-weight="700" fill="#e9edf5">${tolText}</text>
+        <polygon points="${capPoly}" fill="#0d121c" stroke="#ff7d61" stroke-width="1.8" stroke-linejoin="round"/>
+        <line x1="${capBodyStart}" y1="${y0}" x2="${capBodyStart}" y2="${y0 + h}" stroke="#ff7d61" stroke-width="1.3"/>
+        <line x1="${capMidX}" y1="${y0}" x2="${capMidX}" y2="${y0 + h}" stroke="#ff7d61" stroke-width="1.3"/>
         ${relSym}
-        <text x="${capMidX + datW / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#181715">${fcf.datum}</text>
+        <text x="${capMidX + datW / 2}" y="${y0 + 22.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="14" font-weight="700" fill="#e9edf5">${fcf.datum}</text>
       </svg>`;
   }
 

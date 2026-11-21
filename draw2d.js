@@ -35,9 +35,9 @@
   }
 
   function drawPlateGrid(ctx, w, h) {
-    ctx.fillStyle = '#f3ebda';
+    ctx.fillStyle = '#0e141e';
     ctx.fillRect(0, 0, w, h);
-    ctx.strokeStyle = 'rgba(24, 23, 21, 0.06)';
+    ctx.strokeStyle = 'rgba(233, 237, 245, 0.06)';
     ctx.lineWidth = 1;
     for (let x = 0; x < w; x += 26) {
       ctx.beginPath();
@@ -103,13 +103,13 @@
 
       // Shaded tolerance corridor
       ctx.fillStyle = res.activeSliceError <= p.toleranceMm + 1e-9
-        ? 'rgba(4, 120, 87, 0.13)'
-        : 'rgba(217, 68, 38, 0.14)';
+        ? 'rgba(88, 182, 145, 0.13)'
+        : 'rgba(255, 125, 97, 0.14)';
       ctx.fillRect(padL, midY - halfZonePx, plotW, halfZonePx * 2);
 
       // Chebyshev zone dashed rails
       ctx.save();
-      ctx.strokeStyle = '#d94426';
+      ctx.strokeStyle = '#ff7d61';
       ctx.lineWidth = 1.4;
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
@@ -122,7 +122,7 @@
 
       // Extracted surface line (deviation relative to Chebyshev mid-line)
       ctx.lineWidth = 2.4;
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.beginPath();
       pts.forEach((pt, idx) => {
         const px = padL + pt.frac * plotW;
@@ -139,7 +139,7 @@
         if (Math.abs(dev) > p.toleranceMm * 0.5 + 1e-9) {
           const px = padL + pt.frac * plotW;
           const py = midY - dev * yScale;
-          ctx.fillStyle = '#d94426';
+          ctx.fillStyle = '#ff7d61';
           ctx.beginPath();
           ctx.arc(px, py, 3.2, 0, Math.PI * 2);
           ctx.fill();
@@ -155,25 +155,25 @@
         const dev = pt.y - (fit.slope * pt.t + fit.intercept);
         const px = padL + pt.frac * plotW;
         const py = midY - dev * yScale;
-        ctx.fillStyle = '#d94426';
+        ctx.fillStyle = '#ff7d61';
         ctx.beginPath();
         ctx.arc(px, py, 4.5, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#faf5e8';
+        ctx.strokeStyle = '#0a101a';
         ctx.lineWidth = 1.4;
         ctx.stroke();
       }
 
       // Dimension bracket for t_G on left
-      drawDimArrow(ctx, padL - 12, midY - halfZonePx, padL - 12, midY + halfZonePx, '#d94426');
-      ctx.fillStyle = '#d94426';
+      drawDimArrow(ctx, padL - 12, midY - halfZonePx, padL - 12, midY + halfZonePx, '#ff7d61');
+      ctx.fillStyle = '#ff7d61';
       ctx.font = 'bold 10px "JetBrains Mono", monospace';
       ctx.textAlign = 'right';
       ctx.fillText('t_G', padL - 16, midY + 3);
 
       // Header labels
       const relStr = p.planeRelation === 'parallel' ? `// ${p.datum}` : `⊥ ${p.datum}`;
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.font = 'bold 10.5px "JetBrains Mono", monospace';
       ctx.textAlign = 'left';
       ctx.fillText(
@@ -185,10 +185,10 @@
       );
       ctx.textAlign = 'right';
       const ok = res.activeSliceError <= p.toleranceMm + 1e-9;
-      ctx.fillStyle = ok ? '#047857' : '#b91c1c';
+      ctx.fillStyle = ok ? '#58b691' : '#ff695d';
       ctx.fillText(`e = ${fmtNum(res.activeSliceError, 3, isDe)} / ${fmtTol(p.toleranceMm, isDe)} mm`, w - 10, 16);
 
-      ctx.fillStyle = '#4b463e';
+      ctx.fillStyle = '#a8b3c5';
       ctx.font = '10px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText(`0 mm`, padL, h - 8);
@@ -203,7 +203,7 @@
     const isDatumB = p.datum === 'B';
 
     // Header
-    ctx.fillStyle = '#181715';
+    ctx.fillStyle = '#e9edf5';
     ctx.font = 'bold 10.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
     const relTag = p.planeRelation === 'parallel' ? `// ${p.datum}` : `⊥ ${p.datum}`;
@@ -213,7 +213,7 @@
       16
     );
     ctx.textAlign = 'right';
-    ctx.fillStyle = res.pass ? '#047857' : '#b91c1c';
+    ctx.fillStyle = res.pass ? '#58b691' : '#ff695d';
     ctx.fillText(`e = ${fmtNum(res.controlledError, 3, isDe)} / ${fmtTol(p.toleranceMm, isDe)} mm`, w - 10, 16);
 
     // Draw broken wedge cross-section (Cases III / IV) with true vertical Datum A / horizontal Datum B
@@ -221,8 +221,8 @@
     const tipY = cy - 26;
 
     ctx.save();
-    ctx.fillStyle = '#faf5e8';
-    ctx.strokeStyle = '#181715';
+    ctx.fillStyle = '#0a101a';
+    ctx.strokeStyle = '#e9edf5';
     ctx.lineWidth = 2.0;
     ctx.beginPath();
     if (!isDatumB) {
@@ -247,7 +247,7 @@
     if (!isDatumB) {
       // Extend Datum A strictly vertically upward (true 90° to horizontal t_G rails)
       ctx.save();
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
@@ -259,23 +259,23 @@
       // Datum [A] flag on vertical right face
       const dx = tipX;
       const dy = tipY + 40;
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.beginPath();
       ctx.moveTo(dx, dy);
       ctx.lineTo(dx + 10, dy - 5);
       ctx.lineTo(dx + 10, dy + 5);
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(dx + 10, dy);
       ctx.lineTo(dx + 24, dy);
       ctx.stroke();
-      ctx.fillStyle = '#faf5e8';
+      ctx.fillStyle = '#0a101a';
       ctx.fillRect(dx + 24, dy - 10, 18, 20);
       ctx.strokeRect(dx + 24, dy - 10, 18, 20);
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.font = 'bold 12px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('A', dx + 33, dy + 4);
@@ -283,7 +283,7 @@
       // Extend Datum B strictly horizontally left/right
       const by = tipY + 60;
       ctx.save();
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 1.2;
       ctx.setLineDash([5, 4]);
       ctx.beginPath();
@@ -294,7 +294,7 @@
 
       // Parallel // marks on Datum B line if // B
       if (normAxisY) {
-        ctx.strokeStyle = '#181715';
+        ctx.strokeStyle = '#e9edf5';
         ctx.lineWidth = 1.3;
         ctx.beginPath();
         ctx.moveTo(tipX - 60, by + 4);
@@ -306,23 +306,23 @@
 
       // Datum [B] flag below bottom face
       const bx = tipX - 22;
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.beginPath();
       ctx.moveTo(bx, by);
       ctx.lineTo(bx - 5, by + 9);
       ctx.lineTo(bx + 5, by + 9);
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 1.3;
       ctx.beginPath();
       ctx.moveTo(bx, by + 9);
       ctx.lineTo(bx, by + 18);
       ctx.stroke();
-      ctx.fillStyle = '#faf5e8';
+      ctx.fillStyle = '#0a101a';
       ctx.fillRect(bx - 9, by + 18, 18, 18);
       ctx.strokeRect(bx - 9, by + 18, 18, 18);
-      ctx.fillStyle = '#181715';
+      ctx.fillStyle = '#e9edf5';
       ctx.font = 'bold 12px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('B', bx, by + 31);
@@ -343,7 +343,7 @@
     const halfGapPx = (p.toleranceMm * 0.5) * scalePx;
 
     ctx.save();
-    ctx.strokeStyle = '#d94426';
+    ctx.strokeStyle = '#ff7d61';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([6, 4]);
     if (normAxisY) {
@@ -358,26 +358,26 @@
       ctx.restore();
 
       // Dimension t_G arrows
-      drawDimArrow(ctx, tipX + 44, y1, tipX + 44, y2, '#d94426');
-      ctx.fillStyle = '#d94426';
+      drawDimArrow(ctx, tipX + 44, y1, tipX + 44, y2, '#ff7d61');
+      ctx.fillStyle = '#ff7d61';
       ctx.font = 'bold 10px "JetBrains Mono", monospace';
       ctx.textAlign = 'left';
       ctx.fillText('t_G', tipX + 50, tipY + 3);
 
       // Right-angle symbol (for ⊥ A) or // marks (for // B)
       if (!isDatumB) {
-        ctx.strokeStyle = '#181715';
+        ctx.strokeStyle = '#e9edf5';
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.arc(tipX, y1, 9, -Math.PI / 2, 0);
         ctx.stroke();
-        ctx.fillStyle = '#181715';
+        ctx.fillStyle = '#e9edf5';
         ctx.beginPath();
         ctx.arc(tipX + 4, y1 - 4, 1.5, 0, Math.PI * 2);
         ctx.fill();
       } else {
         for (const yy of [y1, y2]) {
-          ctx.strokeStyle = '#d94426';
+          ctx.strokeStyle = '#ff7d61';
           ctx.lineWidth = 1.3;
           ctx.beginPath();
           ctx.moveTo(tipX - 66, yy + 4);
@@ -399,8 +399,8 @@
       ctx.stroke();
       ctx.restore();
 
-      drawDimArrow(ctx, x1, tipY - 28, x2, tipY - 28, '#d94426');
-      ctx.fillStyle = '#d94426';
+      drawDimArrow(ctx, x1, tipY - 28, x2, tipY - 28, '#ff7d61');
+      ctx.fillStyle = '#ff7d61';
       ctx.font = 'bold 10px "JetBrains Mono", monospace';
       ctx.textAlign = 'center';
       ctx.fillText('t_G', tipX, tipY - 33);
@@ -408,7 +408,7 @@
       // Relation marks: // for // A, right-angle arc for ⊥ B
       if (!isDatumB) {
         for (const xx of [x1, x2]) {
-          ctx.strokeStyle = '#d94426';
+          ctx.strokeStyle = '#ff7d61';
           ctx.lineWidth = 1.3;
           ctx.beginPath();
           ctx.moveTo(xx - 3, tipY - 12);
@@ -419,12 +419,12 @@
         }
       } else {
         const by = tipY + 60;
-        ctx.strokeStyle = '#181715';
+        ctx.strokeStyle = '#e9edf5';
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.arc(x2, by, 9, -Math.PI / 2, 0);
         ctx.stroke();
-        ctx.fillStyle = '#181715';
+        ctx.fillStyle = '#e9edf5';
         ctx.beginPath();
         ctx.arc(x2 + 4, by - 4, 1.5, 0, Math.PI * 2);
         ctx.fill();
@@ -432,7 +432,7 @@
     }
 
     // End-on projected locus of the edge along u in [0, 1]
-    ctx.strokeStyle = res.pass ? '#047857' : '#b91c1c';
+    ctx.strokeStyle = res.pass ? '#58b691' : '#ff695d';
     ctx.lineWidth = 2.0;
     ctx.beginPath();
     samples.forEach((s, idx) => {
@@ -453,7 +453,7 @@
       const fOff = s.freeVal - (fitF.slope * s.xMm + fitF.intercept);
       const px = normAxisY ? tipX + fOff * scalePx : tipX + cOff * scalePx;
       const py = normAxisY ? tipY - cOff * scalePx : tipY - fOff * scalePx;
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.arc(px, py, 5.5, 0, Math.PI * 2);
@@ -470,11 +470,11 @@
       const fOff = s.freeVal - (fitF.slope * s.xMm + fitF.intercept);
       const px = normAxisY ? tipX + fOff * scalePx : tipX + cOff * scalePx;
       const py = normAxisY ? tipY - cOff * scalePx : tipY - fOff * scalePx;
-      ctx.fillStyle = '#d94426';
+      ctx.fillStyle = '#ff7d61';
       ctx.beginPath();
       ctx.arc(px, py, 4.2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#faf5e8';
+      ctx.strokeStyle = '#0a101a';
       ctx.lineWidth = 1.4;
       ctx.stroke();
     }
@@ -505,7 +505,7 @@
     const toY = (val) => padT + plotH - clamp(val / maxVal, 0, 1.04) * plotH;
 
     // Axes
-    ctx.strokeStyle = '#181715';
+    ctx.strokeStyle = '#e9edf5';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.moveTo(padL, padT);
@@ -516,7 +516,7 @@
     // Horizontal threshold line t_G
     const yTol = toY(p.toleranceMm);
     ctx.save();
-    ctx.strokeStyle = '#d94426';
+    ctx.strokeStyle = '#ff7d61';
     ctx.lineWidth = 1.6;
     ctx.setLineDash([6, 4]);
     ctx.beginPath();
@@ -525,7 +525,7 @@
     ctx.stroke();
     ctx.restore();
 
-    ctx.fillStyle = '#d94426';
+    ctx.fillStyle = '#ff7d61';
     ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
     ctx.fillText(`t_G=${fmtTol(p.toleranceMm, isDe)}`, padL + plotW - 4, Math.max(padT + 10, yTol - 4));
@@ -533,7 +533,7 @@
     // Secondary reference line (Flatness + Diagonal in f/g, or Orthogonal Unconstrained Sway in h/i)
     const yRef = toY(refSecond);
     ctx.save();
-    ctx.strokeStyle = '#b45309';
+    ctx.strokeStyle = '#ed864b';
     ctx.lineWidth = 1.3;
     ctx.setLineDash([3, 3]);
     ctx.beginPath();
@@ -549,15 +549,15 @@
       : (isDe ? `Frei=${fmtNum(refSecond, 3, isDe)}` : `Unconstr=${fmtNum(refSecond, 3, isDe)}`);
     const lw = ctx.measureText(refLbl).width + 8;
     const ly = Math.max(padT + 10, yRef - 4);
-    ctx.fillStyle = 'rgba(243, 235, 218, 0.88)';
+    ctx.fillStyle = 'rgba(14, 20, 30, 0.88)';
     ctx.fillRect(padL + 3, ly - 9, lw, 12);
-    ctx.fillStyle = '#b45309';
+    ctx.fillStyle = '#ed864b';
     ctx.textAlign = 'left';
     ctx.fillText(refLbl, padL + 6, ly);
 
     // Main station deviation curve
     if (stations.length > 1) {
-      ctx.strokeStyle = '#181715';
+      ctx.strokeStyle = '#e9edf5';
       ctx.lineWidth = 2.2;
       ctx.beginPath();
       stations.forEach((st, i) => {
@@ -571,7 +571,7 @@
       // Shaded red zone above t_G
       stations.forEach((st) => {
         if (st.error > p.toleranceMm + 1e-9) {
-          ctx.fillStyle = 'rgba(217, 68, 38, 0.8)';
+          ctx.fillStyle = 'rgba(255, 125, 97, 0.8)';
           ctx.beginPath();
           ctx.arc(toX(st.sFrac), toY(st.error), 2.5, 0, Math.PI * 2);
           ctx.fill();
@@ -582,7 +582,7 @@
     // Active slice cursor
     const xCur = toX(p.sliceFrac);
     ctx.save();
-    ctx.strokeStyle = 'rgba(217, 68, 38, 0.7)';
+    ctx.strokeStyle = 'rgba(255, 125, 97, 0.7)';
     ctx.lineWidth = 1.3;
     ctx.beginPath();
     ctx.moveTo(xCur, padT);
@@ -590,13 +590,13 @@
     ctx.stroke();
     ctx.restore();
 
-    ctx.fillStyle = '#d94426';
+    ctx.fillStyle = '#ff7d61';
     ctx.beginPath();
     ctx.arc(xCur, toY(res.activeSliceError), 4.2, 0, Math.PI * 2);
     ctx.fill();
 
     // Header & axis labels
-    ctx.fillStyle = '#181715';
+    ctx.fillStyle = '#e9edf5';
     ctx.font = 'bold 10.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
     ctx.fillText(
@@ -607,7 +607,7 @@
       16
     );
 
-    ctx.fillStyle = '#4b463e';
+    ctx.fillStyle = '#a8b3c5';
     ctx.font = '9.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'right';
     ctx.fillText(`${fmtNum(maxVal, 2, isDe)}`, padL - 5, padT + 6);
